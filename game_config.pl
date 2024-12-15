@@ -47,7 +47,7 @@ game_play:-
     clear_buffer,
     write('\nHey Player 1 '),
     player_last_moves(Move),
-    format('You chose as your last move ~w \n', [Move]),
+    format('You choose as your last move ~w \n', [Move]),
     write('\nHey Player 1 '),
     game_board(Width, Length),
     format('You chose a board ~w x ~w \n', [Width, Length]).
