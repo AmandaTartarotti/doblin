@@ -17,9 +17,6 @@ get_number(Value) :-
 
 %game-configuration
 
-player(1, player1).
-player(2, player2).
-
 welcome:-
     write('===================================================================\n'),
     write('=                                                                 =\n'),
@@ -140,9 +137,8 @@ game_config:-
     clear_buffer,
     write('\nHey Player 1'),
     nl,
-    player_last_moves(Move),
-    format('You choose as your last move ~w \n', [Move]),
-    %write('\nHey Player 1 '),
+    player_last_moves(Last_move),
+    format('You choose as your last move ~w \n', [Last_move]),
     game_board(Width, Length),
     get_board(Width, Length, Board),  % Create the board
     nl,
@@ -154,13 +150,47 @@ game_config:-
     format_board(Board).  % Print the board
     %format('Your game board:\n~w\n', [Board]).
 
+%------------------------------------------------
+
+%Defined Data Structures
+
+player(1, player1).
+player(2, player2).
+
+board_size( _Width, _Length).
+
+%empyt Last_move = 1
+%joker Last_move = 2
+
+player_info( _player, _Last_move).
+
 %--------------------------------------------------
-%player_last_moves/1 
-player_last_moves(Move):-
+
+%general implementation of the inputs_handlers, but always repeats the message twice for some reason :c
+input_checker(Min, Max, Value) :-
+    between(Min, Max, Value).
+input_checker(_):-
+    write('Invalid option. Try again.\n'),
+    clear_buffer,
+    fail. 
+
+%checks if it is a valid mode input
+input_checker_mode(Value) :-
+    between(1, 2, Value).
+input_checker_mode(_):-
+    write('Invalid option. Try again.\n'),
+    clear_buffer,
+    fail.  
+
+%player_last_moves 
+player_last_moves(Move) :-
+    repeat,
     write('What will be your last 4 moves?\n'),
     write('1 - Empty places\n'),
     write('2 - Joker places\n'),
-    get_number(Move).
+    get_number(Move),
+    input_checker_mode(Move).
+    %input_checker(1, 2, Move).
 
 %--------------------------------------------------
 %criar o board
@@ -192,36 +222,33 @@ format_row(Row) :-
 %--------------------------------------------------
 %Logica-para-pegar-o-tamanho-do-tabuleiro
 
-handle_board(Value) :-
+input_checker_board(Value) :-
     between(4, 8, Value).
-   % between(4, 8, Value),          
-   % !.    %perceber melhor, 
-handle_board(_) :-
+input_checker_board(_):-
     write('Invalid option. Try again.\n'),
-    %clear_buffer,  % Clear the buffer before retrying
-    %game_board. %its wrong because game_board uses 2 arguments, using fail its better
+    clear_buffer,  % Clear the buffer before retrying
     fail.  % Force failure to retry input
 
-board_width(Width):-
-    repeat,          
+board_width(Width) :-
+    repeat,        
     write('Choose the board WIDTH:\n'),
     write('Hint: only numbers between 4-8:'),
     get_number(Width),
-    handle_board(Width).
-    %!.
-    
+    input_checker_board(Width).
+    %input_checker(4, 8, Width). 
 
 board_length(Length) :-
     repeat,  % Retry loop
     write('\nChoose the board LENGTH:\n'),
     write('Hint: only numbers between 4-8:'),
     get_number(Length), 
-    handle_board(Length).  
-    %!. %nao é preciso pois não?
+    input_checker_board(Length).
+    %input_checker(4, 8, Length).   
 
 game_board(Width, Length) :-
     clear_buffer,
     board_width(Width),
+    clear_buffer,
     board_length(Length).
 
 %DICAS PARA PROJETO 16/12/2024
