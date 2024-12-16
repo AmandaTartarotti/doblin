@@ -1,3 +1,5 @@
+%/usr/local/sicstus4.9.0/bin/sicstus
+%consult('/Users/tatianalin/Downloads/3ANO/PFL/Training/PROLOG/game_config.pl').
 :- use_module(library(between)).
 
 %utils
@@ -97,23 +99,7 @@ info_about_project:-
     write('###############################################################\n'),
     nl. 
 
-%handle_mode(1):- game_play.
-%handle_mode(_):- 
-%    write('Other game_modes to be defined').
-
-%game_mode:-  
-%    write('\nChoose a game mode:\n'),
-%   write('1 - Human vs. Human\n'),
-%   write('2 - Human vs. Computer\n'),
-%   write('3 - Computer vs. Computer\n'),
-%   get_number(Mode),
-%   handle_mode(Mode).
-
-%game_start:-
-    %welcome,
-    %game_rules,
-    %game_mode.
-
+%--------------------------------------------------
 handle_mode(1):- game_config.
 handle_mode(2):- 
     write('game_mode 2 to be defined').
@@ -124,7 +110,8 @@ handle_mode(4):-
     game_rules, %fazer que ao clicar em [E] voltar para o menu
     repeat,
     get_char(Char),
-    ( Char = 'E' ; Char = 'e' ), % Aceitar tanto 'E' quanto 'e' %como fazemos para nao usar '='??? aqui usamos o '='
+    member(Char,['E','e']),
+    %( Char = 'E' ; Char = 'e' ), 
     !, % Sai do repeat após uma entrada válida
     game_start.
 
@@ -132,17 +119,19 @@ handle_mode(5):-
     info_about_project,
     repeat,
     get_char(Char),
-    ( Char = 'E' ; Char = 'e' ), % Aceitar tanto 'E' quanto 'e' %como fazemos para nao usar '='??? aqui usamos o '='
+    member(Char,['E','e']),
+    %( Char = 'E' ; Char = 'e' ), 
     !, % Sai do repeat após uma entrada válida
     game_start.
 
 handle_mode(_):- 
     write('Other game_modes to be defined'). %dizer e fazer para repetir ate meter numero entre 1-5
-
+%--------------------------------------------------
 game_mode:-  
     get_number(Mode),
     handle_mode(Mode).
 
+%--------------------------------------------------
 game_start:-
     welcome,
     game_mode.
@@ -165,16 +154,15 @@ game_config:-
     format_board(Board).  % Print the board
     %format('Your game board:\n~w\n', [Board]).
 
-%show the board direitinho
-format_board([]).  % Base case for empty list
-format_board([Row|Rest]) :-
-    format_row(Row),
-    nl,  % New line after each row
-    format_board(Rest).
+%--------------------------------------------------
+%player_last_moves/1 
+player_last_moves(Move):-
+    write('What will be your last 4 moves?\n'),
+    write('1 - Empty places\n'),
+    write('2 - Joker places\n'),
+    get_number(Move).
 
-format_row(Row) :-
-    format('~w', [Row]).  % Print each row
-
+%--------------------------------------------------
 %criar o board
 default('-').
 create_list(_, 0, []).
@@ -189,16 +177,19 @@ create_board(Element, Width, Length, Board) :-
 
 get_board(Width, Length, Board) :-
     default(Element),
-    create_board(Element, Width, Length, Board).    
+    create_board(Element, Width, Length, Board).
 
+%show the board direitinho
+format_board([]).  % Base case for empty list
+format_board([Row|Rest]) :-
+    format_row(Row),
+    nl,  % New line after each row
+    format_board(Rest).
 
-player_last_moves(Move):-
-    write('What will be your last 4 moves?\n'),
-    write('1 - Empty places\n'),
-    write('2 - Joker places\n'),
-    get_number(Move).
+format_row(Row) :-
+    format('~w', [Row]).  % Print each row
 
-
+%--------------------------------------------------
 %Logica-para-pegar-o-tamanho-do-tabuleiro
 
 handle_board(Value) :-
@@ -207,7 +198,7 @@ handle_board(Value) :-
    % !.    %perceber melhor, 
 handle_board(_) :-
     write('Invalid option. Try again.\n'),
-    clear_buffer,  % Clear the buffer before retrying
+    %clear_buffer,  % Clear the buffer before retrying
     %game_board. %its wrong because game_board uses 2 arguments, using fail its better
     fail.  % Force failure to retry input
 
@@ -216,21 +207,50 @@ board_width(Width):-
     write('Choose the board WIDTH:\n'),
     write('Hint: only numbers between 4-8:'),
     get_number(Width),
-    handle_board(Width),
-    !.
+    handle_board(Width).
+    %!.
+    
 
 board_length(Length) :-
     repeat,  % Retry loop
     write('\nChoose the board LENGTH:\n'),
     write('Hint: only numbers between 4-8:'),
     get_number(Length), 
-    handle_board(Length),  
-    !.  
-
+    handle_board(Length).  
+    %!. %nao é preciso pois não?
 
 game_board(Width, Length) :-
     clear_buffer,
     board_width(Width),
     board_length(Length).
 
+%DICAS PARA PROJETO 16/12/2024
+%bot random
+%bot mais inteligente
 
+%O que é suposto fazer o bot inteligente? Ver o 'value'!!!!!
+%Considerar todas as jogadas possiveis, e ver qual é a melhor jogada possivel.
+
+%NO CASO DE CHESS
+%a medida do site chess.com é que no exemplo do stor, tem 6 pioes de desvantagem
+%fazer Nw-Nb, e fazer formula com o value das peças
+%value= 9*(Qw-Qb)+5*(Rw-Rb)+3*(Bw-Bb)+3*(Nw-Nb)+1*(Pw-Pb)
+
+%controlar o centro do tabuleiro
+%ou seja nao só ver o numero de peças, mas tmb ver a posição das peças
+
+%no das tartarugas, ver o numero de tartarugas que já passou para o lado do adversario
+%+
+%ver a distancia a que tao do outro lado do adversário
+
+%Como condensar as duas condições?
+%-Ter função que pesa as duas coisas
+%value(State,Value):-
+%    eval_n_pieces(State,V1),
+%    eval_n_moves(State,V2),
+%    Value is V1+V2. % ou até pode ser Value is V1*0.4+V2*0.6.
+
+%valid_moves
+%findall(move(X-Y), Xf-Yf), (between(1,8,X),..para o resto das variaveis), can_move(State,move(X-Y,Xf-Yf)),ListMoves).
+
+%o bot nao é determinisco, dentro dos valid moves, fazer random!!!!! 
