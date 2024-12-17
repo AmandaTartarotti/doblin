@@ -97,10 +97,13 @@ info_about_project:-
     nl. 
 
 %--------------------------------------------------
-handle_mode(1):- game_config.
-handle_mode(2):- 
+handle_mode(1, Last_move1, Last_move2):- 
+    game_human(1, Last_move1),
+    game_human(2, Last_move2).
+handle_mode(2, _Last_move1, _Last_move2):- 
+    game_human(1, _Last_move1),
     write('game_mode 2 to be defined').
-handle_mode(3):- 
+handle_mode(3, _Last_move1, _Last_move2):- 
     write('game_mode 3 to be defined').
 
 handle_mode(4):- 
@@ -124,21 +127,18 @@ handle_mode(5):-
 handle_mode(_):- 
     write('Other game_modes to be defined'). %dizer e fazer para repetir ate meter numero entre 1-5
 %--------------------------------------------------
-game_mode:-  
+
+%Return the game mode (H/H, H/PC, PC/H, or PC/PC) and the players defined last_move
+game_mode(Mode, Last_move1, Last_move2):-  
     get_number(Mode),
-    handle_mode(Mode).
+    handle_mode(Mode, Last_move1, Last_move2).
 
 %--------------------------------------------------
-game_start:-
+%old game start, só mudei para seguir a nomenclatura que esta na descricao do projeto
+game_menu:-
     welcome,
-    game_mode.
-
-game_config:-
-    clear_buffer,
-    write('\nHey Player 1'),
+    game_mode(Mode, Last_move1, Last_move2),
     nl,
-    player_last_moves(Last_move),
-    format('You choose as your last move ~w \n', [Last_move]),
     game_board(Width, Length),
     get_board(Width, Length, Board),  % Create the board
     nl,
@@ -146,23 +146,38 @@ game_config:-
     format('|  You chose a board ~w x ~w!  |\n', [Width, Length]),
     write(' ============================\n'),
     nl,
-    %write('Your game board:\n'),
-    format_board(Board).  % Print the board
-    %format('Your game board:\n~w\n', [Board]).
+    format_board(Board),  % Print the board
+    nl,
+
+    %Criar informações dos jogadores
+    %PlayerInfo1  = player_info(1, Last_move1, 0),
+    %PlayerInfo2  = player_info(2, Last_move2, 0),
+
+    %Criar a configuração do jogo
+    %GameConfig  = game_configuration(Mode, board_size(Width, Length), player_info1, player_info2, 1),
+
+    format('Game Mode: ~w\nPlayer1 last move: ~w\nPlayer2 last move: ~w\n', [Mode, Last_move1, Last_move2]).
+
+game_human(Player, Last_move):-
+    clear_buffer,
+    format('\nHey Player ~w', [Player]),
+    nl,
+    player_last_moves(Last_move),
+    format('You choose as your last move ~w \n', [Last_move]).
+
 
 %------------------------------------------------
 
 %Defined Data Structures
 
-player(1, player1).
-player(2, player2).
-
 board_size( _Width, _Length).
+
+game_configuration(_Game_mode, _board_size, _player_info1, _player_info2, _player_turn).
+
+player_info( _Player, _Last_move, _Score).
 
 %empyt Last_move = 1
 %joker Last_move = 2
-
-player_info( _player, _Last_move).
 
 %--------------------------------------------------
 
