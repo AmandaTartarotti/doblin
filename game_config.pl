@@ -1,6 +1,8 @@
 %/usr/local/sicstus4.9.0/bin/sicstus
 %consult('/Users/tatianalin/Downloads/3ANO/PFL/Training/PROLOG/game_config.pl').
+
 :- use_module(library(between)).
+:- use_module(library(random)).
 
 %utils
 
@@ -137,24 +139,26 @@ game_mode(Mode, Last_move1, Last_move2):-
 %old game start, só mudei para seguir a nomenclatura que esta na descricao do projeto
 game_menu:-
     welcome,
-    game_mode(Mode, Last_move1, Last_move2),
-    nl,
-    game_board(Width, Length),
-    get_board(Width, Length, Board),  % Create the board
+    game_mode(Mode, Last_move1, Last_move2),nl,
+    game_board(Width, Height), %get the board measure -- user input
+    
+    %get_board(Width, Length, Board),  % Create the board
     nl,
     write(' ============================\n'),
-    format('|  You chose a board ~w x ~w!  |\n', [Width, Length]),
+    format('|  You chose a board ~w x ~w!  |\n', [Width, Height]),
     write(' ============================\n'),
-    nl,
-    format_board(Board),  % Print the board
     nl,
 
+    %format_board(Board),  % Print the board
+    generate_board(Width, Height), % Creates and Print the board
+    nl,
+    
     %Criar informações dos jogadores
     %PlayerInfo1  = player_info(1, Last_move1, 0),
     %PlayerInfo2  = player_info(2, Last_move2, 0),
 
     %Criar a configuração do jogo
-    %GameConfig  = game_configuration(Mode, board_size(Width, Length), player_info1, player_info2, 1),
+    %GameConfig  = game_configuration(Mode, board_size(Width, Height), player_info1, player_info2),
 
     format('Game Mode: ~w\nPlayer1 last move: ~w\nPlayer2 last move: ~w\n', [Mode, Last_move1, Last_move2]).
 
@@ -170,9 +174,11 @@ game_human(Player, Last_move):-
 
 %Defined Data Structures
 
-board_size( _Width, _Length).
+board_size( _Width, _Height).
 
-game_configuration(_Game_mode, _board_size, _player_info1, _player_info2, _player_turn).
+game_configuration(_Game_mode, _board_size, _player_info1, _player_info2).
+
+game_state(_player_turn).
 
 player_info( _Player, _Last_move, _Score).
 
@@ -208,7 +214,36 @@ player_last_moves(Move) :-
     %input_checker(1, 2, Move).
 
 %--------------------------------------------------
+
+%criar board com random indices 
+
+random_index_number(Width):-
+    findall(Number, between(1, Width, Number), List), %create a list of numbers between 1 and Width
+    random_permutation(List, ShuffledList), %shuffle this list using random
+    write('   '), % um espaço adicional so para formatar bonitin c:
+    format('~w', [ShuffledList]).  % Print each row
+
+random_index_letters(Height, ShuffledLetters):-
+    Start is 65, %Código ASCII para 'A'
+    End is Start + Height - 1,
+    findall(Letter, (between(Start, End, Code), char_code(Letter, Code)), List),  %create a list of letters between a and Height
+    random_permutation(List, ShuffledLetters). %shuffle
+
+print_board_rows([], _).
+print_board_rows([Letter|Tail], Width) :-
+    findall('-', between(1, Width, _), Places),
+    format('~w  ~w\n', [Letter, Places]),
+    print_board_rows(Tail, Width).
+
+generate_board(Width, Height) :-
+    random_index_number(Width), nl,
+    random_index_letters(Height, ShuffledLetters),
+    print_board_rows(ShuffledLetters, Width).
+
+%--------------------------------------------------
+
 %criar o board
+
 default('-').
 create_list(_, 0, []).
 create_list(Element, Size, [Element|Sublist]) :-
