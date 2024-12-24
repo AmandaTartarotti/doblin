@@ -136,38 +136,70 @@ game_mode(Mode, Last_move1, Last_move2):-
     handle_mode(Mode, Last_move1, Last_move2).
 
 %--------------------------------------------------
+
+% Imprime as informações de um jogador
+
+print_player_info(player_info(Player, _, Score, Board), Width) :-
+    format('Player ~w score: ~w\n', [Player, Score]),
+    print_player_board(Board, Width).
+
+print_board_rows([], _).
+print_board_rows([Letter|Tail], Width) :-
+    findall('-', between(1, Width, _), Places),
+    format('~w  ~w\n', [Letter, Places]),
+    print_board_rows(Tail, Width).
+
+print_player_board(board(Numbers, Letters), Width) :-
+    write('   '), % um espaço adicional so para formatar bonitin c:
+    format('~w', [Numbers]), nl,  % Print each row
+    print_board_rows(Letters, Width).
+
+
+%---------------------------------------------------
 %old game start, só mudei para seguir a nomenclatura que esta na descricao do projeto
 game_menu:-
     welcome,
-    game_mode(Mode, Last_move1, Last_move2),nl,
-    game_board(Width, Height), %get the board measure -- user input
+    game_mode(Mode, Last_move1, Last_move2), % Obter o modo de jogo e os movimentos finais dos jogadores
+    nl,
+    game_board(Width, Height),         % Obter as dimensões do tabuleiro
+    BoardSize = board_size(Width, Height),
     
-    %get_board(Width, Length, Board),  % Create the board
     nl,
     write(' ============================\n'),
     format('|  You chose a board ~w x ~w!  |\n', [Width, Height]),
     write(' ============================\n'),
     nl,
 
-    %format_board(Board),  % Print the board
-    generate_board(Width, Height), % Creates and Print the board
-    nl,
+    % Geração dos tabuleiros
+    generate_board(Width, Height, Board1), % Cria o tabuleiro para o jogador 1
+    generate_board(Width, Height, Board2), % Cria o tabuleiro para o jogador 2
     
     %Criar informações dos jogadores
-    %PlayerInfo1  = player_info(1, Last_move1, 0),
-    %PlayerInfo2  = player_info(2, Last_move2, 0),
+    PlayerInfo1  = player_info(1, Last_move1, 0, Board1),
+    PlayerInfo2  = player_info(2, Last_move2, 0, Board2),
+
+    %Imprimir informações dos jogadores
+    print_player_info(PlayerInfo1, Width), nl,
+    print_player_info(PlayerInfo2, Width), nl, 
 
     %Criar a configuração do jogo
-    %GameConfig  = game_configuration(Mode, board_size(Width, Height), player_info1, player_info2),
+    GameConfig  = game_configuration(Mode, BoardSize, PlayerInfo1, PlayerInfo2),
+    initial_state(GameConfig).
 
-    format('Game Mode: ~w\nPlayer1 last move: ~w\nPlayer2 last move: ~w\n', [Mode, Last_move1, Last_move2]).
 
 game_human(Player, Last_move):-
     clear_buffer,
-    format('\nHey Player ~w', [Player]),
+    format('\nHey Player ~w', [Player]),    
     nl,
     player_last_moves(Last_move),
     format('You choose as your last move ~w \n', [Last_move]).
+
+
+%-----------------------------------------------
+
+%initial_state(GameConfig, GameState).
+
+
 
 
 %------------------------------------------------
@@ -178,9 +210,9 @@ board_size( _Width, _Height).
 
 game_configuration(_Game_mode, _board_size, _player_info1, _player_info2).
 
-game_state(_player_turn).
+game_state(_player_turn, _player_info1,  _player_info2).
 
-player_info( _Player, _Last_move, _Score).
+player_info( _Player, _Last_move, _Score, _Board).
 
 %empyt Last_move = 1
 %joker Last_move = 2
@@ -217,11 +249,9 @@ player_last_moves(Move) :-
 
 %criar board com random indices 
 
-random_index_number(Width):-
+random_index_number(Width, ShuffledNumbers):-
     findall(Number, between(1, Width, Number), List), %create a list of numbers between 1 and Width
-    random_permutation(List, ShuffledList), %shuffle this list using random
-    write('   '), % um espaço adicional so para formatar bonitin c:
-    format('~w', [ShuffledList]).  % Print each row
+    random_permutation(List, ShuffledNumbers). %shuffle this list using random
 
 random_index_letters(Height, ShuffledLetters):-
     Start is 65, %Código ASCII para 'A'
@@ -229,20 +259,14 @@ random_index_letters(Height, ShuffledLetters):-
     findall(Letter, (between(Start, End, Code), char_code(Letter, Code)), List),  %create a list of letters between a and Height
     random_permutation(List, ShuffledLetters). %shuffle
 
-print_board_rows([], _).
-print_board_rows([Letter|Tail], Width) :-
-    findall('-', between(1, Width, _), Places),
-    format('~w  ~w\n', [Letter, Places]),
-    print_board_rows(Tail, Width).
-
-generate_board(Width, Height) :-
-    random_index_number(Width), nl,
+generate_board(Width, Height, Board) :-
+    random_index_number(Width, ShuffledNumbers), nl,
     random_index_letters(Height, ShuffledLetters),
-    print_board_rows(ShuffledLetters, Width).
+    Board = board(ShuffledNumbers, ShuffledLetters).
 
 %--------------------------------------------------
 
-%criar o board
+%criar o board - antigo --> tive que mudar a implementação para add os indices
 
 default('-').
 create_list(_, 0, []).
@@ -270,7 +294,7 @@ format_row(Row) :-
     format('~w', [Row]).  % Print each row
 
 %--------------------------------------------------
-%Logica-para-pegar-o-tamanho-do-tabuleiro
+%Logica para pegar o tamanho do tabuleiro
 
 input_checker_board(Value) :-
     between(4, 8, Value).
