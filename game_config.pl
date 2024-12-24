@@ -156,7 +156,9 @@ print_player_board(board(Numbers, Letters), Width) :-
 
 
 %---------------------------------------------------
+
 %old game start, só mudei para seguir a nomenclatura que esta na descricao do projeto
+
 game_menu:-
     welcome,
     game_mode(Mode, Last_move1, Last_move2), % Obter o modo de jogo e os movimentos finais dos jogadores
@@ -178,10 +180,6 @@ game_menu:-
     PlayerInfo1  = player_info(1, Last_move1, 0, Board1),
     PlayerInfo2  = player_info(2, Last_move2, 0, Board2),
 
-    %Imprimir informações dos jogadores
-    print_player_info(PlayerInfo1, Width), nl,
-    print_player_info(PlayerInfo2, Width), nl, 
-
     %Criar a configuração do jogo
     GameConfig  = game_configuration(Mode, BoardSize, PlayerInfo1, PlayerInfo2),
     initial_state(GameConfig).
@@ -197,10 +195,24 @@ game_human(Player, Last_move):-
 
 %-----------------------------------------------
 
-%initial_state(GameConfig, GameState).
+initial_state(
+    game_configuration(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2), game_state
+):-
+    CurrentPlayer = 1,
+    GameState = game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer),
+    display_game(GameState).
 
 
+%-----------------------------------------------
 
+display_game(game_state(_, board_size(Width, _), PlayerInfo1, PlayerInfo2, CurrentPlayer)) :-
+    format('Current Player: ~w\n', [CurrentPlayer]),
+
+    nl, write('Game Boards:\n'), nl,
+
+    %Imprimir informações dos jogadores
+    print_player_info(PlayerInfo1, Width), nl,
+    print_player_info(PlayerInfo2, Width), nl. 
 
 %------------------------------------------------
 
@@ -208,9 +220,9 @@ game_human(Player, Last_move):-
 
 board_size( _Width, _Height).
 
-game_configuration(_Game_mode, _board_size, _player_info1, _player_info2).
+game_configuration(_game_mode, _board_size, _player_info1, _player_info2).
 
-game_state(_player_turn, _player_info1,  _player_info2).
+game_state(_game_mode, _board_size, _player_info1,  _player_info2, _current_player).
 
 player_info( _Player, _Last_move, _Score, _Board).
 
