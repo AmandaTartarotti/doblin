@@ -4,6 +4,8 @@
 :- use_module(library(between)).
 :- use_module(library(random)).
 
+%--------------------------------------------------
+
 %utils
 
 clear_buffer:-
@@ -16,6 +18,31 @@ get_number(Value) :-
     get_char(Char),
     char_code(Char, Code),
     Value is Code - 48.
+
+%general implementation of the inputs_handlers, but always repeats the message twice for some reason :c
+input_checker(Min, Max, Value) :-
+    between(Min, Max, Value).
+input_checker(_):-
+    write('Invalid option. Try again.\n'),
+    clear_buffer,
+    fail. 
+
+%--------------------------------------------------
+
+%Defined Data Structures
+
+board_size( _Width, _Height).
+
+game_configuration(_game_mode, _board_size, _player_info1, _player_info2).
+
+game_state(_game_mode, _board_size, _player_info1,  _player_info2, _current_player).
+
+player_info( _Player, _Last_move, _Score, _Board).
+
+%empyt Last_move = 1
+%joker Last_move = 2
+
+%--------------------------------------------------
 
 %game-configuration
 
@@ -135,27 +162,17 @@ game_mode(Mode, Last_move1, Last_move2):-
     get_number(Mode),
     handle_mode(Mode, Last_move1, Last_move2).
 
+%-----------------------------------------------
+
+game_human(Player, Last_move):-
+    clear_buffer,
+    format('\nHey Player ~w', [Player]),    
+    nl,
+    player_last_moves(Last_move),
+    format('You choose as your last move ~w \n', [Last_move]).
+
+
 %--------------------------------------------------
-
-% Imprime as informações de um jogador
-
-print_player_info(player_info(Player, _, Score, Board), Width) :-
-    format('Player ~w score: ~w\n', [Player, Score]),
-    print_player_board(Board, Width).
-
-print_board_rows([], _).
-print_board_rows([Letter|Tail], Width) :-
-    findall('-', between(1, Width, _), Places),
-    format('~w  ~w\n', [Letter, Places]),
-    print_board_rows(Tail, Width).
-
-print_player_board(board(Numbers, Letters), Width) :-
-    write('   '), % um espaço adicional so para formatar bonitin c:
-    format('~w', [Numbers]), nl,  % Print each row
-    print_board_rows(Letters, Width).
-
-
-%---------------------------------------------------
 
 %old game start, só mudei para seguir a nomenclatura que esta na descricao do projeto
 
@@ -184,15 +201,6 @@ game_menu:-
     GameConfig  = game_configuration(Mode, BoardSize, PlayerInfo1, PlayerInfo2),
     initial_state(GameConfig).
 
-
-game_human(Player, Last_move):-
-    clear_buffer,
-    format('\nHey Player ~w', [Player]),    
-    nl,
-    player_last_moves(Last_move),
-    format('You choose as your last move ~w \n', [Last_move]).
-
-
 %-----------------------------------------------
 
 initial_state(
@@ -205,6 +213,8 @@ initial_state(
 
 %-----------------------------------------------
 
+% Display game and aux
+
 display_game(game_state(_, board_size(Width, _), PlayerInfo1, PlayerInfo2, CurrentPlayer)) :-
     format('Current Player: ~w\n', [CurrentPlayer]),
 
@@ -214,30 +224,27 @@ display_game(game_state(_, board_size(Width, _), PlayerInfo1, PlayerInfo2, Curre
     print_player_info(PlayerInfo1, Width), nl,
     print_player_info(PlayerInfo2, Width), nl. 
 
+print_player_info(player_info(Player, _, Score, Board), Width) :-
+    format('Player ~w score: ~w\n', [Player, Score]),
+    print_player_board(Board, Width).
+
+print_player_board(board(Numbers, Letters), Width) :-
+    write('   '), % um espaço adicional so para formatar bonitin c:
+    format('~w', [Numbers]), nl,  % Print each row
+    print_board_rows(Letters, Width).
+
+print_board_rows([], _).
+print_board_rows([Letter|Tail], Width) :-
+    findall('-', between(1, Width, _), Places),
+    format('~w  ~w\n', [Letter, Places]),
+    print_board_rows(Tail, Width).
+
+%---------------------------------------------------
+
+
+
 %------------------------------------------------
 
-%Defined Data Structures
-
-board_size( _Width, _Height).
-
-game_configuration(_game_mode, _board_size, _player_info1, _player_info2).
-
-game_state(_game_mode, _board_size, _player_info1,  _player_info2, _current_player).
-
-player_info( _Player, _Last_move, _Score, _Board).
-
-%empyt Last_move = 1
-%joker Last_move = 2
-
-%--------------------------------------------------
-
-%general implementation of the inputs_handlers, but always repeats the message twice for some reason :c
-input_checker(Min, Max, Value) :-
-    between(Min, Max, Value).
-input_checker(_):-
-    write('Invalid option. Try again.\n'),
-    clear_buffer,
-    fail. 
 
 %checks if it is a valid mode input
 input_checker_mode(Value) :-
@@ -258,6 +265,7 @@ player_last_moves(Move) :-
     %input_checker(1, 2, Move).
 
 %--------------------------------------------------
+
 
 %criar board com random indices 
 
@@ -306,6 +314,7 @@ format_row(Row) :-
     format('~w', [Row]).  % Print each row
 
 %--------------------------------------------------
+
 %Logica para pegar o tamanho do tabuleiro
 
 input_checker_board(Value) :-
@@ -336,6 +345,8 @@ game_board(Width, Length) :-
     board_width(Width),
     clear_buffer,
     board_length(Length).
+
+%--------------------------------------------------
 
 %DICAS PARA PROJETO 16/12/2024
 %bot random
