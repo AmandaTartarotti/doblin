@@ -3,7 +3,9 @@
 
 :- use_module(library(between)).
 :- use_module(library(random)).
+:- use_module(library(lists)).
 
+:- consult(move).
 %--------------------------------------------------
 
 %utils
@@ -19,14 +21,6 @@ get_number(Value) :-
     char_code(Char, Code),
     Value is Code - 48.
 
-%general implementation of the inputs_handlers, but always repeats the message twice for some reason :c
-input_checker(Min, Max, Value) :-
-    between(Min, Max, Value).
-input_checker(_):-
-    write('Invalid option. Try again.\n'),
-    clear_buffer,
-    fail. 
-
 %--------------------------------------------------
 
 %Defined Data Structures
@@ -38,6 +32,8 @@ game_configuration(_game_mode, _board_size, _player_info1, _player_info2).
 game_state(_game_mode, _board_size, _player_info1,  _player_info2, _current_player).
 
 player_info( _Player, _Last_move, _Score, _Board).
+
+board(_Numbers, _Letters, _Cells).
 
 %empyt Last_move = 1
 %joker Last_move = 2
@@ -199,7 +195,7 @@ game_menu:-
 
     %Criar a configuração do jogo
     GameConfig  = game_configuration(Mode, BoardSize, PlayerInfo1, PlayerInfo2),
-    initial_state(GameConfig).
+    initial_state(GameConfig, game_state).
 
 %-----------------------------------------------
 
@@ -208,8 +204,11 @@ initial_state(
 ):-
     CurrentPlayer = 1,
     GameState = game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer),
-    display_game(GameState).
-
+    display_game(GameState),
+    
+    clear_buffer,
+    read_move(Move),
+    move(GameState, Move).
 
 %-----------------------------------------------
 
@@ -228,7 +227,7 @@ print_player_info(player_info(Player, _, Score, Board), Width) :-
     format('Player ~w score: ~w\n', [Player, Score]),
     print_player_board(Board, Width).
 
-print_player_board(board(Numbers, Letters), Width) :-
+print_player_board(board(Numbers, Letters, _), Width) :-
     write('   '), % um espaço adicional so para formatar bonitin c:
     format('~w', [Numbers]), nl,  % Print each row
     print_board_rows(Letters, Width).
@@ -279,10 +278,17 @@ random_index_letters(Height, ShuffledLetters):-
     findall(Letter, (between(Start, End, Code), char_code(Letter, Code)), List),  %create a list of letters between a and Height
     random_permutation(List, ShuffledLetters). %shuffle
 
+generate_empty_cells(Width, Height, Cells) :-
+    length(Row, Width),          % Cria uma linha vazia com a largura definida
+    maplist(=('-'), Row),        % Preenche a linha com espaços vazios
+    length(Cells, Height),       % Cria a lista de linhas
+    maplist(=(Row), Cells).      % Preenche cada linha com a mesma estrutura.
+
 generate_board(Width, Height, Board) :-
     random_index_number(Width, ShuffledNumbers), nl,
     random_index_letters(Height, ShuffledLetters),
-    Board = board(ShuffledNumbers, ShuffledLetters).
+    generate_empty_cells(Width, Height, Cells),
+    Board = board(ShuffledNumbers, ShuffledLetters, Cells).
 
 %--------------------------------------------------
 
