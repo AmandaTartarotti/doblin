@@ -208,7 +208,8 @@ initial_state(
     
     clear_buffer,
     read_move(Move),
-    move(GameState, Move).
+    move(game_state, GameState, Move),
+    write("The end end").
 
 %-----------------------------------------------
 

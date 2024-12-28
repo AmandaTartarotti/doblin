@@ -20,13 +20,14 @@ read_move(Move):-
 
 %---------------------------------------------------   
 
-move(game_state(_, board_size(Width, Height), PlayerInfo1, _, _), Move):-
-    validate_move(Move, board_size(Width, Height), PlayerInfo1), !. %passa um PlayerInfo qualquer para validar se é uma posição valida no board
-    
-    %execute_move(Move, PlayerInfo1, PlayerInfo2, UpdateInfo1, UpdateInfo2), %update the users board and score
+move(NewState, game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer), Move):-
+    validate_move(Move, board_size(Width, Height), PlayerInfo1), %passa um PlayerInfo qualquer para validar se é uma posição valida no board
+    !, 
+    execute_move(Move, PlayerInfo1, PlayerInfo2, UpdateInfo1, UpdateInfo2), 
 
-    %NextPlayer is (CurrentPlayer mod 2) + 1,
-    %NewState = game_state(Mode, board_size(Width, Height), UpdateInfo1, UpdateInfo2, NextPlayer).
+    NextPlayer is (CurrentPlayer mod 2) + 1,
+    write('\nReturning NewState\n'),
+    NewState = game_state(Mode, board_size(Width, Height), UpdateInfo1, UpdateInfo2, NextPlayer).
 
 move(GameState, _):-
     write('Invalid move. Please try again.\nEnter exactly two characters and make sure it is a free space on the board!\n'),
@@ -57,7 +58,7 @@ find_index(Value, List, Index) :-
 validate_range(Row, Col, board_size(Width, Height)):-
 
     input_checker(1, Height, Row),
-    input_checker(1, Width, Col),
+    input_checker(1, Width, Col).
     %write('Move in a valid range\n').
 
 %validate if it is a free space in the board
@@ -83,9 +84,31 @@ find_cellcode(RowNumber, Col, board(ShuffledNumbers, ShuffledLetters, Cells), Ce
 validate_free_space(45):- 
     write('Free Space, Move Valid!\n').
 
-validate_free_space(_):- 
-    write('This space is occupied..\n'),
-    fail.
+%---------------------------------------------------  
+
+%execute move - update the users board and score
+
+execute_move(_, player_info(_, Last_move1, _, Board1), player_info(_, Last_move2, _, Board2), UpdateInfo1, UpdateInfo2):-
+
+    write('Now we are executing the move\n'),
+    NewBoard1 = Board1,
+    NewBoard2 = Board2,
+    %update_board(Move,Board1, NewBoard1),
+    %update_board(Move,Board2, NewBoard2),
+
+    NewScore1 = 0,
+    NewScore2 = 0,
+    %count_score(NewBoard1, NewScore1),
+    %count_score(NewBoard2, NewScore2),
+
+    UpdateInfo1  = player_info(1, Last_move1, NewScore1, NewBoard1),
+    UpdateInfo2  = player_info(2, Last_move2, NewScore2, NewBoard2),
+    write("The end for now").
+
+
+%update_board(Move,Board1, NewBoard1):-
+
+%count_score(NewBoard2, NewScore2):-
     
 
 %---------------------------------------------------   
