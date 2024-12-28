@@ -27,12 +27,12 @@ move(NewState, game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerIn
     execute_move(moviment(Move,Symbol), PlayerInfo1, PlayerInfo2, UpdateInfo1, UpdateInfo2), 
 
     NextPlayer is (3 - CurrentPlayer),
-    NewState = game_state(Mode, board_size(Width, Height), UpdateInfo1, UpdateInfo2, NextPlayer),
-    write('\nReturning NewState\n').
+    NewState = game_state(Mode, board_size(Width, Height), UpdateInfo1, UpdateInfo2, NextPlayer).
 
 move(NewState, GameState, _):-
     write('Invalid move. Please try again.\nEnter exactly two characters and make sure it is a free space on the board!\n'),
     nl,
+    clear_buffer,
     read_move(NewMove),
     move(NewState, GameState, NewMove).
 
@@ -86,26 +86,24 @@ find_cellcode(RowNumber, Col, board(ShuffledNumbers, ShuffledLetters, Cells), Ce
 validate_free_space(45):- 
     write('Free Space, Move Valid!\n').
 
-%---------------------------------------------------  
+%---------------------------------------------------
+%---------------------------------------------------   
 
 %execute move - update the users board and score
 
 execute_move(moviment(Move,Symbol), player_info(_, Last_move1, _, Board1), player_info(_, Last_move2, _, Board2), UpdateInfo1, UpdateInfo2):-
 
-    write('Now we are executing the movement\n'),
-
     update_board(moviment(Move,Symbol),Board1, NewBoard1),
     update_board(moviment(Move,Symbol),Board2, NewBoard2),
 
-    NewScore1 = 0,
-    NewScore2 = 0,
-    %count_score(NewBoard1, NewScore1),
-    %count_score(NewBoard2, NewScore2),
+    NewScore1 is 0, NewScore2 is 0,
+    count_score(NewBoard1, NewScore1),
+    count_score(NewBoard2, NewScore2),
 
     UpdateInfo1  = player_info(1, Last_move1, NewScore1, NewBoard1),
-    UpdateInfo2  = player_info(2, Last_move2, NewScore2, NewBoard2),
-    write('The end for now\n').
+    UpdateInfo2  = player_info(2, Last_move2, NewScore2, NewBoard2).
 
+%---------------------------------------------------  
 
 update_board(moviment([RowCode, ColCode],Symbol), board(ShuffledNumbers, ShuffledLetters, Cells), NewBoard):-
 
@@ -130,10 +128,65 @@ update_board_aux([Head|Tail], Index, NewInsert, [Head|NewTail]) :-
     NextIndex is Index - 1,
     update_board_aux(Tail, NextIndex, NewInsert, NewTail).
 
+%---------------------------------------------------  
 
-%count_score(NewBoard2, NewScore2):-
+%count the total score for a board considering lines (Row and Column), diagonal and squares
+
+count_score(board(_, _, Cells), Score):- 
+    %lines
+    score_lines(Cells, RowScore),
+    transpose(Cells, Ts),
+    score_lines(Ts,ColScore),
+
+    %diagonal
+    %squares
+
+    Score is RowScore + ColScore.
+
+%---------------------------------------------------  
+
+%Line Case
+
+score_lines([], 0).
+score_lines([Line | Rest], TotalScore) :-
+    score_line(Line, LineScore),
+    score_lines(Rest, RestScore),
+    TotalScore is LineScore + RestScore.
+
+%Recursive Case
+score_line([A,A,A,A |Tail], Score):-
+    A \= '-',
+    score_line([A,A,A | Tail], NewScore),
+    Score is NewScore + 1.
+
+score_line([_ | Tail], Score) :-
+    score_line(Tail, Score).
+
+%Base Case
+score_line(Line, 0) :-
+    length(Line, Len),
+    Len < 4.
+
+%--------------------------------------------------- 
+
+%Diagonal Case -- under implementation
+
+list_diag1([], []).
+list_diag1([[E|_]|Ess], [E|Ds]) :-
+    maplist(list_tail, Ess, Ess0),
+    list_diag1(Ess0, Ds).
+
+list_tail([_|Es], Es).
+
+list_diag2(Ess,Ds) :-
+    maplist(reverse, Ess, Fss),
+    list_diag1(Fss, Ds).
+
+%--------------------------------------------------- 
+
+%Square Case
     
-
+%--------------------------------------------------- 
 %---------------------------------------------------   
 
 %general implementation of the inputs_handlers, but always repeats the message twice for some reason :c

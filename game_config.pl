@@ -4,6 +4,7 @@
 :- use_module(library(between)).
 :- use_module(library(random)).
 :- use_module(library(lists)).
+:- use_module(library(clpfd)).
 
 :- consult(move).
 %--------------------------------------------------
@@ -219,7 +220,7 @@ initial_state(
 % Display game and aux
 
 display_game(game_state(_, board_size(Width, _), PlayerInfo1, PlayerInfo2, CurrentPlayer)) :-
-    format('Current Player: ~w\n', [CurrentPlayer]),
+    format('\nCurrent Player: ~w\n', [CurrentPlayer]),
 
     nl, write('Game Boards:\n'), nl,
 
