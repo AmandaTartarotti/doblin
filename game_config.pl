@@ -35,6 +35,8 @@ player_info( _Player, _Last_move, _Score, _Board).
 
 board(_Numbers, _Letters, _Cells).
 
+moviment(_Move,_Symbol).
+
 %empyt Last_move = 1
 %joker Last_move = 2
 
@@ -207,9 +209,10 @@ initial_state(
     display_game(GameState),
     
     clear_buffer,
-    read_move(Move),
-    move(game_state, GameState, Move),
-    write("The end end").
+    read_move(UserMove),
+    move(NewState, GameState, UserMove),
+    display_game(NewState),
+    write('The end end').
 
 %-----------------------------------------------
 
@@ -228,16 +231,15 @@ print_player_info(player_info(Player, _, Score, Board), Width) :-
     format('Player ~w score: ~w\n', [Player, Score]),
     print_player_board(Board, Width).
 
-print_player_board(board(Numbers, Letters, _), Width) :-
+print_player_board(board(Numbers, Letters, Cells), Width) :-
     write('   '), % um espaço adicional so para formatar bonitin c:
     format('~w', [Numbers]), nl,  % Print each row
-    print_board_rows(Letters, Width).
+    print_board_rows(Letters, Cells, Width).
 
-print_board_rows([], _).
-print_board_rows([Letter|Tail], Width) :-
-    findall('-', between(1, Width, _), Places),
-    format('~w  ~w\n', [Letter, Places]),
-    print_board_rows(Tail, Width).
+print_board_rows([], [], _).
+print_board_rows([Letter|Tail], [CellHead|CellTail], Width) :-
+    format('~w  ~w\n', [Letter, CellHead]),
+    print_board_rows(Tail, CellTail, Width).
 
 %---------------------------------------------------
 
