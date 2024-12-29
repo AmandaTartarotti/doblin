@@ -211,7 +211,9 @@ initial_state(
 % Display game and aux
 
 display_game(game_state(_, board_size(Width, _), PlayerInfo1, PlayerInfo2, CurrentPlayer)) :-
-    format('\nCurrent Player: ~w\n', [CurrentPlayer]),
+    write('\n ***************************\n'),
+    format('      Current Player: ~w\n', [CurrentPlayer]),
+    write(' ***************************\n'),
 
     nl, write('Game Boards:\n'), nl,
 

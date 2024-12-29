@@ -1,3 +1,6 @@
+next_player(game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer), NewState):-
+    NextPlayer is (3 - CurrentPlayer),
+    NewState = game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, NextPlayer).
 
 %---------------------------------------------------
 
@@ -13,12 +16,6 @@ process(-1, []). % código ASCII para end_of_file (-1)
 process(Code, [Code | Rest]) :-
     read_line_to_codes(Rest).
 
-choose_move(_, moviment(Move, Symbol)):-
-    Symbol = 'X',
-    write('Enter your move (example: 2B): '),
-    read_line_to_codes(Move).
-    %format('The character codes are: ~w~n', [Move]).
-
 %---------------------------------------------------   
 
 move(game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer), moviment(Move,Symbol), NewState):-
@@ -26,8 +23,7 @@ move(game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, Curre
     !, 
     execute_move(moviment(Move,Symbol), PlayerInfo1, PlayerInfo2, UpdateInfo1, UpdateInfo2), 
 
-    NextPlayer is (3 - CurrentPlayer),
-    NewState = game_state(Mode, board_size(Width, Height), UpdateInfo1, UpdateInfo2, NextPlayer).
+    NewState = game_state(Mode, board_size(Width, Height), UpdateInfo1, UpdateInfo2, CurrentPlayer).
 
 move(GameState, _, NewState):-
     write('Invalid move. Please try again.\nEnter exactly two characters and make sure it is a free space on the board!\n'),
