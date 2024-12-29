@@ -6,7 +6,6 @@
 :- use_module(library(lists)).
 :- use_module(library(clpfd)).
 
-:- consult(move).
 %--------------------------------------------------
 
 %utils
@@ -175,7 +174,7 @@ game_human(Player, Last_move):-
 
 %old game start, só mudei para seguir a nomenclatura que esta na descricao do projeto
 
-game_menu:-
+game_menu(GameConfig):-
     welcome,
     game_mode(Mode, Last_move1, Last_move2), % Obter o modo de jogo e os movimentos finais dos jogadores
     nl,
@@ -197,23 +196,15 @@ game_menu:-
     PlayerInfo2  = player_info(2, Last_move2, 0, Board2),
 
     %Criar a configuração do jogo
-    GameConfig  = game_configuration(Mode, BoardSize, PlayerInfo1, PlayerInfo2),
-    initial_state(GameConfig, game_state).
+    GameConfig  = game_configuration(Mode, BoardSize, PlayerInfo1, PlayerInfo2).
 
 %-----------------------------------------------
 
 initial_state(
-    game_configuration(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2), game_state
+    game_configuration(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2), GameState
 ):-
     CurrentPlayer = 1,
-    GameState = game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer),
-    display_game(GameState),
-    
-    clear_buffer,
-    read_move(UserMove),
-    move(NewState, GameState, UserMove),
-    display_game(NewState),
-    write('The end end').
+    GameState = game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer).
 
 %-----------------------------------------------
 
@@ -354,7 +345,8 @@ game_board(Width, Length) :-
     clear_buffer,
     board_width(Width),
     clear_buffer,
-    board_length(Length).
+    board_length(Length),
+    clear_buffer.
 
 %--------------------------------------------------
 

@@ -13,7 +13,7 @@ process(-1, []). % código ASCII para end_of_file (-1)
 process(Code, [Code | Rest]) :-
     read_line_to_codes(Rest).
 
-read_move(moviment(Move, Symbol)):-
+choose_move(_, moviment(Move, Symbol)):-
     Symbol = 'X',
     write('Enter your move (example: 2B): '),
     read_line_to_codes(Move).
@@ -21,7 +21,7 @@ read_move(moviment(Move, Symbol)):-
 
 %---------------------------------------------------   
 
-move(NewState, game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer), moviment(Move,Symbol)):-
+move(game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer), moviment(Move,Symbol), NewState):-
     validate_move(moviment(Move,_), board_size(Width, Height), PlayerInfo1), %passa um PlayerInfo qualquer para validar se é uma posição valida no board
     !, 
     execute_move(moviment(Move,Symbol), PlayerInfo1, PlayerInfo2, UpdateInfo1, UpdateInfo2), 
@@ -29,12 +29,11 @@ move(NewState, game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerIn
     NextPlayer is (3 - CurrentPlayer),
     NewState = game_state(Mode, board_size(Width, Height), UpdateInfo1, UpdateInfo2, NextPlayer).
 
-move(NewState, GameState, _):-
+move(GameState, _, NewState):-
     write('Invalid move. Please try again.\nEnter exactly two characters and make sure it is a free space on the board!\n'),
     nl,
-    clear_buffer,
-    read_move(NewMove),
-    move(NewState, GameState, NewMove).
+    choose_move(GameState, NewMove),
+    move(GameState, NewMove, NewState).
 
 
 %--------------------------------------------------- 
@@ -59,8 +58,8 @@ find_index(Value, List, Index) :-
 %validate if it is in the Row Col range 
 validate_range(Row, Col, board_size(Width, Height)):-
 
-    input_checker(1, Height, Row),
-    input_checker(1, Width, Col).
+    input_checker(1, Height, Col),
+    input_checker(1, Width, Row).
     %write('Move in a valid range\n').
 
 %validate if it is a free space in the board
@@ -77,14 +76,15 @@ find_cellcode(RowNumber, Col, board(ShuffledNumbers, ShuffledLetters, Cells), Ce
     find_index(RowNumber, ShuffledNumbers, RowIndex),
     %format('The index Row is ~w~n', [RowIndex]),
     
-    nth1(RowIndex, Cells, RowList),  % Get the row in the board
-    nth1(ColIndex, RowList, Cell),   % Get the cell in the row 
+    nth1(ColIndex, Cells, RowList),  % Get the row in the board
+    %format('RowList ~w', [RowList]),
+    nth1(RowIndex, RowList, Cell),   % Get the cell in the row 
     
     char_code(Cell, CellCode).
     %format('The character code is: ~w~n', [CellCode]).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
 
 validate_free_space(45):- 
-    write('Free Space, Move Valid!\n').
+    write('\nFree Space, Move Valid!\n').
 
 %---------------------------------------------------
 %---------------------------------------------------   
@@ -97,8 +97,8 @@ execute_move(moviment(Move,Symbol), player_info(_, Last_move1, _, Board1), playe
     update_board(moviment(Move,Symbol),Board2, NewBoard2),
 
     NewScore1 is 0, NewScore2 is 0,
-    count_score(NewBoard1, NewScore1),
-    count_score(NewBoard2, NewScore2),
+    %count_score(NewBoard1, NewScore1),
+    %count_score(NewBoard2, NewScore2),
 
     UpdateInfo1  = player_info(1, Last_move1, NewScore1, NewBoard1),
     UpdateInfo2  = player_info(2, Last_move2, NewScore2, NewBoard2).
@@ -115,9 +115,9 @@ update_board(moviment([RowCode, ColCode],Symbol), board(ShuffledNumbers, Shuffle
     find_index(Row, ShuffledNumbers, RowIndex),
     %format('The index Row is ~w~n', [RowIndex]),
 
-    nth1(RowIndex,Cells, OldRow),
-    update_board_aux(OldRow, ColIndex, Symbol, NewRow),
-    update_board_aux(Cells, RowIndex, NewRow, NewCells),
+    nth1(ColIndex,Cells, OldRow),
+    update_board_aux(OldRow, RowIndex, Symbol, NewRow),
+    update_board_aux(Cells, ColIndex, NewRow, NewCells),
 
     NewBoard = board(ShuffledNumbers, ShuffledLetters, NewCells).
 
@@ -135,29 +135,39 @@ update_board_aux([Head|Tail], Index, NewInsert, [Head|NewTail]) :-
 count_score(board(_, _, Cells), Score):- 
     %lines
     score_lines(Cells, RowScore),
-    transpose(Cells, Ts),
-    score_lines(Ts,ColScore),
+    Score is RowScore,
+    format('RowScore: ~w\n', [RowScore]),
+    format('Score: ~w\n', [Score]).
+
+    %transpose(Cells, Ts),
+    %format('Transpose ~w\n', [Ts]),
+    %score_lines(Ts,ColScore),
 
     %diagonal
     %squares
 
-    Score is RowScore + ColScore.
+    %Score is RowScore + ColScore.
 
 %---------------------------------------------------  
 
 %Line Case
 
 score_lines([], 0).
+
 score_lines([Line | Rest], TotalScore) :-
+    %format('Line ~w and Rest ~w\n', [Line, Rest]),
     score_line(Line, LineScore),
     score_lines(Rest, RestScore),
+    format('LineScore ~w & RestScore ~w\n', [LineScore,RestScore]),
     TotalScore is LineScore + RestScore.
 
 %Recursive Case
 score_line([A,A,A,A |Tail], Score):-
     A \= '-',
+    %format('A ~w\n', [A]),
     score_line([A,A,A | Tail], NewScore),
     Score is NewScore + 1.
+    %format('Score: ~w\n', [Score]).
 
 score_line([_ | Tail], Score) :-
     score_line(Tail, Score).
@@ -191,6 +201,7 @@ list_diag2(Ess,Ds) :-
 
 %general implementation of the inputs_handlers, but always repeats the message twice for some reason :c
 input_checker(Min, Max, Value) :-
+    %format('Min ~w Max ~w Value ~w\n', [Min, Max, Value]),
     between(Min, Max, Value).
 input_checker(_):-
     write('Invalid option. Try again.\n'),
