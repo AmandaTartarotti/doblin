@@ -13,7 +13,7 @@
 clear_buffer:-
     repeat,
     get_char(C),
-    C = '\n',
+    (C = '\n' ; C == -1),  % Verifica se encontrou um Enter ou final de arquivo
     !.
 
 get_number(Value) :-
@@ -241,24 +241,21 @@ print_board_rows([Letter|Tail], [CellHead|CellTail], Width) :-
 
 %------------------------------------------------
 
-
-%checks if it is a valid mode input
-input_checker_mode(Value) :-
-    between(1, 2, Value).
-input_checker_mode(_):-
-    write('Invalid option. Try again.\n'),
-    clear_buffer,
-    fail.  
-
 %player_last_moves 
-player_last_moves(Move) :-
+player_last_moves(MoveSymbol) :-
     repeat,
     write('What will be your last 4 moves?\n'),
     write('1 - Empty places\n'),
     write('2 - Joker places\n'),
     get_number(Move),
-    input_checker_mode(Move).
-    %input_checker(1, 2, Move).
+    input_checker(1, 2, Move),
+    get_symbol(Move, MoveSymbol).
+
+%Empyt places symbol
+get_symbol(1,MoveSymbol):- MoveSymbol = ' '.
+
+%Joker places symbol
+get_symbol(2,MoveSymbol):- MoveSymbol = '@'.
 
 %--------------------------------------------------
 

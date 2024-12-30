@@ -1,51 +1,154 @@
+%---------------------------------------------------
+
+%Next Player
+
 next_player(game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer), NewState):-
     NextPlayer is (3 - CurrentPlayer),
     NewState = game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, NextPlayer).
 
 %---------------------------------------------------
 
-%Read Move and transform user_input to ASCII code
+%Valid Moves -- falta implementar corretamente fiz uma gambiarra
 
-read_line_to_codes(Codes) :-
+valid_moves(_, ValidMoves):-
+
+    %Use this one to avoid the game_over as it has more than 8 elements
+    ValidMoves = [['1', 'A'], ['2', 'A'], ['3', 'A'], ['4', 'A'], ['1', 'B'], ['2', 'B'], ['4', 'B'], ['3', 'B'], ['X','X']].
+
+    %Use this one to access the game_over as it has 8 elements
+    %ValidMoves = [['1', 'A'], ['2', 'A'], ['3', 'A'], ['4', 'A'], ['1', 'B'], ['2', 'B'], ['4', 'B'], ['3', 'B']].
+    %format('ValidMoves -- ~w\n', [ValidMoves]).
+
+%---------------------------------------------------
+
+congratulate(Winner):-
+    write('#############################################################\n'),
+    format('        CONGRATULATIONS THE WINNER IS PLAYER ~w', [Winner]),
+    write('#############################################################\n').
+
+%---------------------------------------------------
+%---------------------------------------------------
+
+%Game Over
+
+%Embora nas descricao do projeto diz para o game_over não imprimir nada no terminal, 
+%no caso do nosso jogo precisamos fazer as 8 jogadas finais para definir o winner.
+
+%Recives a GameState where the CurrentPlayer is 1, checks if there are 8 remain moves to be played, if so it execute the last moves and returns the winner.
+
+game_over(game_state(Mode, BoardSize, PlayerInfo1, PlayerInfo2, 1), Winner):-
+    valid_moves(game_state(Mode, BoardSize, PlayerInfo1, PlayerInfo2, 1), ValidMoves),
+    length(ValidMoves, 8), %Confirma que restam exatamente 8 jogadas
+    execute_last_moves(
+        game_state(Mode, BoardSize, PlayerInfo1, PlayerInfo2, 1), 
+        FinalGameState
+    ),
+    define_winner(FinalGameState, Winner).
+
+game_over(_,_):-
+    fail.
+
+%---------------------------------------------------
+
+define_winner(_GameState, Winner):-
+    Winner is 1.
+
+%---------------------------------------------------
+
+execute_last_moves(game_state(Mode, BoardSize, PlayerInfo1, PlayerInfo2, CurrentPlayer), FinalGameState):-
+    write('Player 1, you have 4 final pieces to place.\n'),
+    place_final_pieces(
+        4,
+        game_state(Mode, BoardSize, PlayerInfo1, PlayerInfo2, CurrentPlayer), 
+        IntermediateGameState),
+    write('Player 2, your 4 final pieces are going to be placed in the remain spaces.\n'),
+    place_remain_final_pieces(4, IntermediateGameState, FinalGameState),
+    display_game(FinalGameState).
+
+%---------------------------------------------------
+
+place_final_pieces(0, GameState, GameState) :- !.
+place_final_pieces(
+    N, 
+    game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1), PlayerInfo2, CurrentPlayer),
+    FinalGameState
+):-
+    N > 0,
+
+    valid_moves(game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1), PlayerInfo2, CurrentPlayer), ValidMoves),
+    random_select(RandomMove, ValidMoves, _Rest),
+    format('RandomMove ~w', [RandomMove]),
+
+    %choose_move(game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1), PlayerInfo2, CurrentPlayer), moviment(UserMove, Last_move1)),
+    move(game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1), PlayerInfo2, CurrentPlayer), moviment(RandomMove, Last_move1), NewGameState),
+    Remain is N - 1,
+    display_game(NewGameState),
+    place_final_pieces(Remain, NewGameState, FinalGameState).
+
+
+place_remain_final_pieces(0,GameState, GameState) :- !.
+place_remain_final_pieces(
+    N,
+    game_state(Mode, BoardSize, PlayerInfo1, player_info(Id2, Last_move2, Score2, Board2), CurrentPlayer), 
+    FinalGameState
+):-
+    N > 0,
+    valid_moves(game_state(Mode, BoardSize, PlayerInfo1, player_info(Id2, Last_move2, Score2, Board2), CurrentPlayer), ValidMoves),
+    random_select(RandomMove, ValidMoves, _Rest),
+    format('RandomMove ~w', [RandomMove]),
+
+    move(game_state(Mode, BoardSize, PlayerInfo1, player_info(Id2, Last_move2, Score2, Board2), CurrentPlayer),  moviment(RandomMove, Last_move2), NewGameState),
+    Remain is N - 1,
+    place_remain_final_pieces(Remain, NewGameState, FinalGameState).
+
+    
+%---------------------------------------------------
+%---------------------------------------------------
+
+%Read Move
+
+read_line_to_string(String) :-
     get_char(Char),
-    char_code(Char, Code),
-    process(Code, Codes).
+    process(Char, String).
 
-process(10, []). % código ASCII para newline (10)
-process(-1, []). % código ASCII para end_of_file (-1)
-process(Code, [Code | Rest]) :-
-    read_line_to_codes(Rest).
+process('\n', []). % código ASCII para newline (10)
+process(Char, [Char | Tail]) :-
+    read_line_to_string(Tail).
 
 %---------------------------------------------------   
 
 move(game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer), moviment(Move,Symbol), NewState):-
+    write('Lets validate_move\n'),
     validate_move(moviment(Move,_), board_size(Width, Height), PlayerInfo1), %passa um PlayerInfo qualquer para validar se é uma posição valida no board
     !, 
     execute_move(moviment(Move,Symbol), PlayerInfo1, PlayerInfo2, UpdateInfo1, UpdateInfo2), 
 
     NewState = game_state(Mode, board_size(Width, Height), UpdateInfo1, UpdateInfo2, CurrentPlayer).
 
-move(GameState, _, NewState):-
-    write('Invalid move. Please try again.\nEnter exactly two characters and make sure it is a free space on the board!\n'),
+move(GameState, moviment(_,Symbol), NewState):-
+    write('\nInvalid move.\nEnter exactly two characters and make sure it is a free space on the board!\n'),
     nl,
-    choose_move(GameState, NewMove),
-    move(GameState, NewMove, NewState).
+    choose_move(GameState, moviment(NewMove,Symbol)),
+    move(GameState, moviment(NewMove,Symbol), NewState).
 
 
 %--------------------------------------------------- 
 
 %Validate Move
 
-validate_move(moviment([RowCode, ColCode], _), board_size(Width, Height), player_info(_, _, _, Board)):-
-    length([RowCode, ColCode], 2),
+validate_move(moviment([RowChar, ColChar], _), board_size(Width, Height), player_info(_, _, _, Board)):-
+    length([RowChar, ColChar], 2),
     %write('Lenght Valid\n'),
+
+    char_code(RowChar, RowCode),
+    char_code(ColChar, ColCode),
 
     Row is RowCode - 48,    % '1'-'9'
     Col is ColCode - 64,    % 'A'-'Z'
 
     validate_range(Row, Col, board_size(Width, Height)),
 
-    find_cellcode(Row, ColCode, Board, CellCode),
+    find_cellcode(Row, ColChar, Board, CellCode),
     validate_free_space(CellCode).
 
 find_index(Value, List, Index) :-
@@ -60,9 +163,7 @@ validate_range(Row, Col, board_size(Width, Height)):-
 
 %validate if it is a free space in the board
 
-find_cellcode(RowNumber, Col, board(ShuffledNumbers, ShuffledLetters, Cells), CellCode):-
-
-    char_code(ColChar, Col), 
+find_cellcode(RowNumber, ColChar, board(ShuffledNumbers, ShuffledLetters, Cells), CellCode):-
 
     %format('The character Row is ~w and Col ~w ~n', [RowNumber, ColChar]),
 
@@ -101,9 +202,9 @@ execute_move(moviment(Move,Symbol), player_info(_, Last_move1, _, Board1), playe
 
 %---------------------------------------------------  
 
-update_board(moviment([RowCode, ColCode],Symbol), board(ShuffledNumbers, ShuffledLetters, Cells), NewBoard):-
+update_board(moviment([RowChar, ColChar],Symbol), board(ShuffledNumbers, ShuffledLetters, Cells), NewBoard):-
 
-    char_code(ColChar, ColCode),
+    char_code(RowChar, RowCode),
     Row is RowCode - 48,
 
     find_index(ColChar, ShuffledLetters, ColIndex),
