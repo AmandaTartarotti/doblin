@@ -21,9 +21,16 @@ valid_moves(_, ValidMoves):-
 
 %---------------------------------------------------
 
-congratulate(Winner):-
+
+congratulate(0):-
     write('#############################################################\n'),
-    format('        CONGRATULATIONS THE WINNER IS PLAYER ~w', [Winner]),
+    write('                  X      IT IS A TIE!      O                  \n'),
+    write('#############################################################\n').   
+
+congratulate(Winner):-
+    Winner \= 0,
+    write('#############################################################\n'),
+    format('        CONGRATULATIONS THE WINNER IS PLAYER ~w\n', [Winner]),
     write('#############################################################\n').
 
 %---------------------------------------------------
@@ -50,8 +57,17 @@ game_over(_,_):-
 
 %---------------------------------------------------
 
-define_winner(_GameState, Winner):-
+define_winner(game_state(_, _, player_info(_, _, Score1, _), player_info(_, _, Score2, _), _), Winner):-
+    ScoreFinal is Score1 - Score2,
+    compare_score(ScoreFinal, Winner).
+
+
+compare_score(0,Winner):- Winner is 0.
+compare_score(N, Winner):- 
+    N > 0,
     Winner is 1.
+compare_score(_, Winner):-Winner is 2.
+
 
 %---------------------------------------------------
 
@@ -74,13 +90,8 @@ place_final_pieces(
     FinalGameState
 ):-
     N > 0,
-
-    valid_moves(game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1), PlayerInfo2, CurrentPlayer), ValidMoves),
-    random_select(RandomMove, ValidMoves, _Rest),
-    format('RandomMove ~w', [RandomMove]),
-
-    %choose_move(game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1), PlayerInfo2, CurrentPlayer), moviment(UserMove, Last_move1)),
-    move(game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1), PlayerInfo2, CurrentPlayer), moviment(RandomMove, Last_move1), NewGameState),
+    choose_move(game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1), PlayerInfo2, CurrentPlayer), moviment(UserMove, Last_move1)),
+    move(game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1), PlayerInfo2, CurrentPlayer), moviment(UserMove, Last_move1), NewGameState),
     Remain is N - 1,
     display_game(NewGameState),
     place_final_pieces(Remain, NewGameState, FinalGameState).
