@@ -275,7 +275,7 @@ score_lines([Line | Rest], TotalScore) :-
 score_line(Line, 0) :-
     length(Line, Len),
     Len < 4, 
-    format('Too short ~w\n', [Len]).
+    format('Too short ~w\n', [Len]), !.
 
 %Recursive Case
 score_line([A,A,A,A|Tail], Score):-
@@ -311,7 +311,6 @@ list_diag2(Ess,Ds) :-
 %--------------------------------------------------- 
 %---------------------------------------------------   
 
-%general implementation of the inputs_handlers, but always repeats the message twice for some reason :c
 input_checker(Min, Max, Value) :-
     %format('Min ~w Max ~w Value ~w\n', [Min, Max, Value]),
     between(Min, Max, Value).
