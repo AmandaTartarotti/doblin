@@ -129,7 +129,6 @@ process(Char, [Char | Tail]) :-
 %---------------------------------------------------   
 
 move(game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer), moviment(Move,Symbol), NewState):-
-    write('Lets validate_move\n'),
     validate_move(moviment(Move,_), board_size(Width, Height), PlayerInfo1), %passa um PlayerInfo qualquer para validar se é uma posição valida no board
     !, 
     execute_move(moviment(Move,Symbol), PlayerInfo1, PlayerInfo2, UpdateInfo1, UpdateInfo2), 
@@ -205,8 +204,9 @@ execute_move(moviment(Move,Symbol), player_info(_, Last_move1, _, Board1), playe
     update_board(moviment(Move,Symbol),Board2, NewBoard2),
 
     NewScore1 is 0, NewScore2 is 0,
-    %count_score(NewBoard1, NewScore1),
-    %count_score(NewBoard2, NewScore2),
+    count_score(NewBoard1, NewScore1),
+    write('Moving to the other player score\n'),
+    count_score(NewBoard2, NewScore2),
 
     UpdateInfo1  = player_info(1, Last_move1, NewScore1, NewBoard1),
     UpdateInfo2  = player_info(2, Last_move2, NewScore2, NewBoard2).
@@ -260,30 +260,34 @@ count_score(board(_, _, Cells), Score):-
 
 %Line Case
 
-score_lines([], 0).
+score_lines([], 0):- write('Finaly here\n').
 
 score_lines([Line | Rest], TotalScore) :-
-    %format('Line ~w and Rest ~w\n', [Line, Rest]),
+    format('Line ~w and Rest ~w\n', [Line, Rest]),
     score_line(Line, LineScore),
     score_lines(Rest, RestScore),
-    format('LineScore ~w & RestScore ~w\n', [LineScore,RestScore]),
-    TotalScore is LineScore + RestScore.
+    TotalScore is LineScore + RestScore,
+    format('LineScore ~w & RestScore ~w & TotalScore ~w\n', [LineScore,RestScore,TotalScore]).
 
-%Recursive Case
-score_line([A,A,A,A |Tail], Score):-
-    A \= '-',
-    %format('A ~w\n', [A]),
-    score_line([A,A,A | Tail], NewScore),
-    Score is NewScore + 1.
-    %format('Score: ~w\n', [Score]).
-
-score_line([_ | Tail], Score) :-
-    score_line(Tail, Score).
+%--------------------------------------------------
 
 %Base Case
 score_line(Line, 0) :-
     length(Line, Len),
-    Len < 4.
+    Len < 4, 
+    format('Too short ~w\n', [Len]).
+
+%Recursive Case
+score_line([A,A,A,A|Tail], Score):-
+    format('A is ~w\n', [A]),
+    A \= '-',
+    write('Find one point\n'),
+    score_line([A,A,A|Tail], NewScore),
+    Score is NewScore + 1.
+
+score_line([_|Tail], Score) :-
+    %write('Nothing here sorry :c\n'),
+    score_line(Tail, Score).
 
 %--------------------------------------------------- 
 

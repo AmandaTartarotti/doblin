@@ -28,8 +28,8 @@ game_cycle(GameState):-
 
 choose_move(_, moviment(Move, Symbol)):-
     format('Enter your move for ~w (example: 2B): ', [Symbol]),
-    read_line_to_string(Move),
-    format('You entered: ~w~n', [Move]).
+    read_line_to_string(Move).
+    %format('You entered: ~w~n', [Move]).
 
 %choose_move(GameState, human, Move):-
     %interaction to select move
