@@ -1,24 +1,14 @@
-%---------------------------------------------------
-
-%Next Player
-
-next_player(game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer), NewState):-
-    NextPlayer is (3 - CurrentPlayer),
-    NewState = game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, NextPlayer).
+%Here you will find:
+%HANDLE GAME OVER
+%HANDLE GAME MOVE
+%HANDLE GAME SCORE
 
 %---------------------------------------------------
+%---------------------------------------------------
 
-%Valid Moves -- falta implementar corretamente fiz uma gambiarra
+%HANDLE GAME OVER
 
-valid_moves(_, ValidMoves):-
-
-    %Use this one to avoid the game_over as it has more than 8 elements
-    ValidMoves = [['1', 'A'], ['2', 'A'], ['3', 'A'], ['4', 'A'], ['1', 'B'], ['2', 'B'], ['4', 'B'], ['3', 'B'], ['X','X']].
-
-    %Use this one to access the game_over as it has 8 elements
-    %ValidMoves = [['1', 'A'], ['2', 'A'], ['3', 'A'], ['4', 'A'], ['1', 'B'], ['2', 'B'], ['4', 'B'], ['3', 'B']].
-    %format('ValidMoves -- ~w\n', [ValidMoves]).
-
+%---------------------------------------------------
 %---------------------------------------------------
 
 
@@ -34,28 +24,6 @@ congratulate(Winner):-
     write('#############################################################\n').
 
 %---------------------------------------------------
-%---------------------------------------------------
-
-%Game Over
-
-%Embora nas descricao do projeto diz para o game_over não imprimir nada no terminal, 
-%no caso do nosso jogo precisamos fazer as 8 jogadas finais para definir o winner.
-
-%Recives a GameState where the CurrentPlayer is 1, checks if there are 8 remain moves to be played, if so it execute the last moves and returns the winner.
-
-game_over(game_state(Mode, BoardSize, PlayerInfo1, PlayerInfo2, 1), Winner):-
-    valid_moves(game_state(Mode, BoardSize, PlayerInfo1, PlayerInfo2, 1), ValidMoves),
-    length(ValidMoves, 8), %Confirma que restam exatamente 8 jogadas
-    execute_last_moves(
-        game_state(Mode, BoardSize, PlayerInfo1, PlayerInfo2, 1), 
-        FinalGameState
-    ),
-    define_winner(FinalGameState, Winner).
-
-game_over(_,_):-
-    fail.
-
-%---------------------------------------------------
 
 define_winner(game_state(_, _, player_info(_, _, Score1, _), player_info(_, _, Score2, _), _), Winner):-
     ScoreFinal is Score1 - Score2,
@@ -67,7 +35,6 @@ compare_score(N, Winner):-
     N > 0,
     Winner is 1.
 compare_score(_, Winner):-Winner is 2.
-
 
 %---------------------------------------------------
 
@@ -113,6 +80,11 @@ place_remain_final_pieces(
     place_remain_final_pieces(Remain, NewGameState, FinalGameState).
 
     
+%---------------------------------------------------
+%---------------------------------------------------
+
+%HANDLE GAME MOVE
+
 %---------------------------------------------------
 %---------------------------------------------------
 
@@ -194,7 +166,6 @@ validate_free_space(45):-
     write('\nFree Space, Move Valid!\n').
 
 %---------------------------------------------------
-%---------------------------------------------------   
 
 %execute move - update the users board and score
 
@@ -204,9 +175,9 @@ execute_move(moviment(Move,Symbol), player_info(_, Last_move1, _, Board1), playe
     update_board(moviment(Move,Symbol),Board2, NewBoard2),
 
     NewScore1 is 0, NewScore2 is 0,
-    count_score(NewBoard1, NewScore1),
-    write('Moving to the other player score\n'),
-    count_score(NewBoard2, NewScore2),
+    %count_score(NewBoard1, NewScore1),
+    %write('Moving to the other player score\n'),
+    %count_score(NewBoard2, NewScore2),
 
     UpdateInfo1  = player_info(1, Last_move1, NewScore1, NewBoard1),
     UpdateInfo2  = player_info(2, Last_move2, NewScore2, NewBoard2).
@@ -235,17 +206,22 @@ update_board_aux([Head|Tail], Index, NewInsert, [Head|NewTail]) :-
     Index > 1, 
     NextIndex is Index - 1,
     update_board_aux(Tail, NextIndex, NewInsert, NewTail).
+ 
+%---------------------------------------------------
+%---------------------------------------------------
 
-%---------------------------------------------------  
+%HANDLE GAME SCORE
+
+%---------------------------------------------------
+%---------------------------------------------------
 
 %count the total score for a board considering lines (Row and Column), diagonal and squares
-
 count_score(board(_, _, Cells), Score):- 
     %lines
-    score_lines(Cells, RowScore),
-    Score is RowScore,
-    format('RowScore: ~w\n', [RowScore]),
-    format('Score: ~w\n', [Score]).
+    write('Estou sendo chamado\n'),
+    score_lines(Cells, Score),
+    format('Score: ~w\n', [Score]),
+    format('Cells: ~w\n', [Cells]).
 
     %transpose(Cells, Ts),
     %format('Transpose ~w\n', [Ts]),
@@ -258,40 +234,51 @@ count_score(board(_, _, Cells), Score):-
 
 %---------------------------------------------------  
 
-%Line Case
+%LINE CASE
 
+%---Main Flow---
+
+%Base Case
 score_lines([], 0):- write('Finaly here\n').
 
+%Recursive Case
 score_lines([Line | Rest], TotalScore) :-
     format('Line ~w and Rest ~w\n', [Line, Rest]),
     score_line(Line, LineScore),
+    format('Line Score: ~w\n', [LineScore]),
     score_lines(Rest, RestScore),
+    format('LineScore ~w & RestScore ~w\n', [LineScore,RestScore]),
+    sum_score(LineScore, RestScore, TotalScore).
+
+sum_score(LineScore, RestScore, TotalScore):-
     TotalScore is LineScore + RestScore,
     format('LineScore ~w & RestScore ~w & TotalScore ~w\n', [LineScore,RestScore,TotalScore]).
 
-%--------------------------------------------------
+%---Auxiliar Flow----
 
 %Base Case
 score_line(Line, 0) :-
     length(Line, Len),
     Len < 4, 
-    format('Too short ~w\n', [Len]), !.
+    format('Too short Line ~w & Len ~w\n', [Line, Len]), !.
 
-%Recursive Case
-score_line([A,A,A,A|Tail], Score):-
+%Recursive Case with points
+score_line([A,A,A,A|_Tail], Score):-
     format('A is ~w\n', [A]),
     A \= '-',
     write('Find one point\n'),
-    score_line([A,A,A|Tail], NewScore),
+    score_line([A,A,A|_Tail], NewScore),
+    format('NewScore ~w & Score ~w\n', [NewScore, Score]),
     Score is NewScore + 1.
 
+%Recursive Case without points
 score_line([_|Tail], Score) :-
     %write('Nothing here sorry :c\n'),
     score_line(Tail, Score).
 
 %--------------------------------------------------- 
 
-%Diagonal Case -- under implementation
+%DIAGONAL CASE -- under implementation
 
 list_diag1([], []).
 list_diag1([[E|_]|Ess], [E|Ds]) :-
@@ -306,15 +293,6 @@ list_diag2(Ess,Ds) :-
 
 %--------------------------------------------------- 
 
-%Square Case
+%SQUARE CASE
     
-%--------------------------------------------------- 
 %---------------------------------------------------   
-
-input_checker(Min, Max, Value) :-
-    %format('Min ~w Max ~w Value ~w\n', [Min, Max, Value]),
-    between(Min, Max, Value).
-input_checker(_):-
-    write('Invalid option. Try again.\n'),
-    clear_buffer,
-    fail. 

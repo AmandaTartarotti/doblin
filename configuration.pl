@@ -1,48 +1,7 @@
 %/usr/local/sicstus4.9.0/bin/sicstus
 %consult('/Users/tatianalin/Downloads/3ANO/PFL/Training/PROLOG/game_config.pl').
 
-:- use_module(library(between)).
-:- use_module(library(random)).
-:- use_module(library(lists)).
-:- use_module(library(clpfd)).
-
 %--------------------------------------------------
-
-%utils
-
-clear_buffer:-
-    repeat,
-    get_char(C),
-    (C = '\n' ; C == -1),  % Verifica se encontrou um Enter ou final de arquivo
-    !.
-
-get_number(Value) :-
-    get_char(Char),
-    char_code(Char, Code),
-    Value is Code - 48.
-
-%--------------------------------------------------
-
-%Defined Data Structures
-
-board_size( _Width, _Height).
-
-game_configuration(_game_mode, _board_size, _player_info1, _player_info2).
-
-game_state(_game_mode, _board_size, _player_info1,  _player_info2, _current_player).
-
-player_info( _Player, _Last_move, _Score, _Board).
-
-board(_Numbers, _Letters, _Cells).
-
-moviment(_Move,_Symbol).
-
-%empyt Last_move = 1
-%joker Last_move = 2
-
-%--------------------------------------------------
-
-%game-configuration
 
 welcome:-
     write('===================================================================\n'),
@@ -124,56 +83,14 @@ info_about_project:-
     nl. 
 
 %--------------------------------------------------
-handle_mode(1, Last_move1, Last_move2):- 
-    game_human(1, Last_move1),
-    game_human(2, Last_move2).
-handle_mode(2, _Last_move1, _Last_move2):- 
-    game_human(1, _Last_move1),
-    write('game_mode 2 to be defined').
-handle_mode(3, _Last_move1, _Last_move2):- 
-    write('game_mode 3 to be defined').
-
-handle_mode(4):- 
-    game_rules, %fazer que ao clicar em [E] voltar para o menu
-    repeat,
-    get_char(Char),
-    member(Char,['E','e']),
-    %( Char = 'E' ; Char = 'e' ), 
-    !, % Sai do repeat após uma entrada válida
-    game_start.
-
-handle_mode(5):-
-    info_about_project,
-    repeat,
-    get_char(Char),
-    member(Char,['E','e']),
-    %( Char = 'E' ; Char = 'e' ), 
-    !, % Sai do repeat após uma entrada válida
-    game_start.
-
-handle_mode(_):- 
-    write('Other game_modes to be defined'). %dizer e fazer para repetir ate meter numero entre 1-5
 %--------------------------------------------------
 
-%Return the game mode (H/H, H/PC, PC/H, or PC/PC) and the players defined last_move
-game_mode(Mode, Last_move1, Last_move2):-  
-    get_number(Mode),
-    handle_mode(Mode, Last_move1, Last_move2).
-
-%-----------------------------------------------
-
-game_human(Player, Last_move):-
-    clear_buffer,
-    format('\nHey Player ~w', [Player]),    
-    nl,
-    player_last_moves(Last_move),
-    format('You choose as your last move ~w \n', [Last_move]).
-
-
-%--------------------------------------------------
 
 %old game start, só mudei para seguir a nomenclatura que esta na descricao do projeto
 
+%GAME MENU
+
+%Allows configuring the game type (H/H, H/PC, PC/H, or PC/PC), difficulty level(s) to be used and define each user last moves 
 game_menu(GameConfig):-
     welcome,
     game_mode(Mode, Last_move1, Last_move2), % Obter o modo de jogo e os movimentos finais dos jogadores
@@ -198,48 +115,65 @@ game_menu(GameConfig):-
     %Criar a configuração do jogo
     GameConfig  = game_configuration(Mode, BoardSize, PlayerInfo1, PlayerInfo2).
 
+%--------------------------------------------------
+%--------------------------------------------------
+
+%GAME MODE HANDLER
+
+%Return the game mode (H/H, H/PC, PC/H, or PC/PC) and the players defined last_move
+game_mode(Mode, Last_move1, Last_move2):-  
+    get_number(Mode),
+    handle_mode(Mode, Last_move1, Last_move2).
+
 %-----------------------------------------------
 
-initial_state(
-    game_configuration(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2), GameState
-):-
-    CurrentPlayer = 1,
-    GameState = game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer).
+%Handle Mode H/H 
+handle_mode(1, Last_move1, Last_move2):- 
+    game_human(1, Last_move1),
+    game_human(2, Last_move2).
 
-%-----------------------------------------------
+%Handle Mode H/PC 
+handle_mode(2, _Last_move1, _Last_move2):- 
+    game_human(1, _Last_move1),
+    write('game_mode 2 to be defined').
 
-% Display game and aux
+%Handle Mode PC/PC 
+handle_mode(3, _Last_move1, _Last_move2):- 
+    write('game_mode 3 to be defined').
 
-display_game(game_state(_, board_size(Width, _), PlayerInfo1, PlayerInfo2, CurrentPlayer)) :-
-    write('\n ***************************\n'),
-    format('      Current Player: ~w\n', [CurrentPlayer]),
-    write(' ***************************\n'),
+%Handle Mode View Game Rules 
+handle_mode(4):- 
+    game_rules, %fazer que ao clicar em [E] voltar para o menu
+    repeat,
+    get_char(Char),
+    member(Char,['E','e']),
+    %( Char = 'E' ; Char = 'e' ), 
+    !, % Sai do repeat após uma entrada válida
+    game_start.
 
-    nl, write('Game Boards:\n'), nl,
+%Handle Mode View info About Project
+handle_mode(5):-
+    info_about_project,
+    repeat,
+    get_char(Char),
+    member(Char,['E','e']),
+    %( Char = 'E' ; Char = 'e' ), 
+    !, % Sai do repeat após uma entrada válida
+    game_start.
 
-    %Imprimir informações dos jogadores
-    print_player_info(PlayerInfo1, Width), nl,
-    print_player_info(PlayerInfo2, Width), nl. 
+%Handle Exceptions
+handle_mode(_):- 
+    write('Other game_modes to be defined'). %dizer e fazer para repetir ate meter numero entre 1-5
 
-print_player_info(player_info(Player, _, Score, Board), Width) :-
-    format('Player ~w score: ~w\n', [Player, Score]),
-    print_player_board(Board, Width).
+%--------------------------------------------------
 
-print_player_board(board(Numbers, Letters, Cells), Width) :-
-    write('   '), % um espaço adicional so para formatar bonitin c:
-    format('~w', [Numbers]), nl,  % Print each row
-    print_board_rows(Letters, Cells, Width).
-
-print_board_rows([], [], _).
-print_board_rows([Letter|Tail], [CellHead|CellTail], Width) :-
-    format('~w  ~w\n', [Letter, CellHead]),
-    print_board_rows(Tail, CellTail, Width).
-
-%---------------------------------------------------
-
-
-
-%------------------------------------------------
+%Get Players last moves
+game_human(Player, Last_move):-
+    clear_buffer,
+    format('\nHey Player ~w', [Player]),    
+    nl,
+    player_last_moves(Last_move),
+    format('You choose as your last move ~w \n', [Last_move]).
 
 %player_last_moves 
 player_last_moves(MoveSymbol) :-
@@ -257,10 +191,12 @@ get_symbol(1,MoveSymbol):- MoveSymbol = ' '.
 %Joker places symbol
 get_symbol(2,MoveSymbol):- MoveSymbol = '@'.
 
+%---------------------------------------------------
 %--------------------------------------------------
 
+%GAME BOARD HANDLER
 
-%criar board com random indices 
+%Generate Board with random indexes
 
 random_index_number(Width, ShuffledNumbers):-
     findall(Number, between(1, Width, Number), List), %create a list of numbers between 1 and Width
@@ -285,6 +221,34 @@ generate_board(Width, Height, Board) :-
     Board = board(ShuffledNumbers, ShuffledLetters, Cells).
 
 %--------------------------------------------------
+
+%Define Board Size  
+
+board_width(Width) :-
+    repeat,        
+    write('Choose the board WIDTH:\n'),
+    write('Hint: only numbers between 4-8:'),
+    get_number(Width),
+    input_checker(4, 8, Width). 
+
+board_length(Length) :-
+    repeat,  % Retry loop
+    write('\nChoose the board LENGTH:\n'),
+    write('Hint: only numbers between 4-8:'),
+    get_number(Length), 
+    input_checker(4, 8, Length).   
+
+game_board(Width, Length) :-
+    clear_buffer,
+    board_width(Width),
+    clear_buffer,
+    board_length(Length),
+    clear_buffer.
+
+%--------------------------------------------------
+%--------------------------------------------------
+
+%APAGAR FUTURAMENTE
 
 %criar o board - antigo --> tive que mudar a implementação para add os indices
 
@@ -312,40 +276,6 @@ format_board([Row|Rest]) :-
 
 format_row(Row) :-
     format('~w', [Row]).  % Print each row
-
-%--------------------------------------------------
-
-%Logica para pegar o tamanho do tabuleiro
-
-input_checker_board(Value) :-
-    between(4, 8, Value).
-input_checker_board(_):-
-    write('Invalid option. Try again.\n'),
-    clear_buffer,  % Clear the buffer before retrying
-    fail.  % Force failure to retry input
-
-board_width(Width) :-
-    repeat,        
-    write('Choose the board WIDTH:\n'),
-    write('Hint: only numbers between 4-8:'),
-    get_number(Width),
-    input_checker_board(Width).
-    %input_checker(4, 8, Width). 
-
-board_length(Length) :-
-    repeat,  % Retry loop
-    write('\nChoose the board LENGTH:\n'),
-    write('Hint: only numbers between 4-8:'),
-    get_number(Length), 
-    input_checker_board(Length).
-    %input_checker(4, 8, Length).   
-
-game_board(Width, Length) :-
-    clear_buffer,
-    board_width(Width),
-    clear_buffer,
-    board_length(Length),
-    clear_buffer.
 
 %--------------------------------------------------
 

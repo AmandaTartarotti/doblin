@@ -1,5 +1,7 @@
+:- consult(utils).
 :- consult(move).
-:- consult(game_config).
+:- consult(configuration).
+:- consult(game_aux).
 
 play_game:-
     game_menu(GameConfig),
@@ -14,15 +16,17 @@ game_cycle(GameState):-
 game_cycle(GameState):-
     
     %O predicado original era choose_move(GameState, Player, UserMove), mas ainda so temos o Player HxH entao omiti Player por agora
+
+    %Iteration X
     choose_move(GameState, moviment(UserMoveX, 'X')), 
     move(GameState, moviment(UserMoveX, 'X'), PartialGameState),
     display_game(PartialGameState),
     
+    %Iteration O
     choose_move(GameState, moviment(UserMoveO, 'O')), 
     move(PartialGameState, moviment(UserMoveO, 'O'), FinalGameState),
 
     next_player(FinalGameState, NewGameState),
-
     display_game(NewGameState), !,
     game_cycle(NewGameState).
 
