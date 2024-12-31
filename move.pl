@@ -1,56 +1,136 @@
+%Here you will find:
+%HANDLE GAME OVER
+%HANDLE GAME MOVE
+%HANDLE GAME SCORE
+
+%---------------------------------------------------
+%---------------------------------------------------
+
+%HANDLE GAME OVER
+
+%---------------------------------------------------
+%---------------------------------------------------
+
+
+congratulate(0):-
+    write('#############################################################\n'),
+    write('                  X      IT IS A TIE!      O                  \n'),
+    write('#############################################################\n').   
+
+congratulate(Winner):-
+    Winner \= 0,
+    write('#############################################################\n'),
+    format('        CONGRATULATIONS THE WINNER IS PLAYER ~w\n', [Winner]),
+    write('#############################################################\n').
 
 %---------------------------------------------------
 
-%Read Move and transform user_input to ASCII code
+define_winner(game_state(_, _, player_info(_, _, Score1, _), player_info(_, _, Score2, _), _), Winner):-
+    ScoreFinal is Score1 - Score2,
+    compare_score(ScoreFinal, Winner).
 
-read_line_to_codes(Codes) :-
+
+compare_score(0,Winner):- Winner is 0.
+compare_score(N, Winner):- 
+    N > 0,
+    Winner is 1.
+compare_score(_, Winner):-Winner is 2.
+
+%---------------------------------------------------
+
+execute_last_moves(game_state(Mode, BoardSize, PlayerInfo1, PlayerInfo2, CurrentPlayer), FinalGameState):-
+    write('Player 1, you have 4 final pieces to place.\n'),
+    place_final_pieces(
+        4,
+        game_state(Mode, BoardSize, PlayerInfo1, PlayerInfo2, CurrentPlayer), 
+        IntermediateGameState),
+    write('Player 2, your 4 final pieces are going to be placed in the remain spaces.\n'),
+    place_remain_final_pieces(4, IntermediateGameState, FinalGameState),
+    display_game(FinalGameState).
+
+%---------------------------------------------------
+
+place_final_pieces(0, GameState, GameState) :- !.
+place_final_pieces(
+    N, 
+    game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1), PlayerInfo2, CurrentPlayer),
+    FinalGameState
+):-
+    N > 0,
+    choose_move(game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1), PlayerInfo2, CurrentPlayer), moviment(UserMove, Last_move1)),
+    move(game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1), PlayerInfo2, CurrentPlayer), moviment(UserMove, Last_move1), NewGameState),
+    Remain is N - 1,
+    display_game(NewGameState),
+    place_final_pieces(Remain, NewGameState, FinalGameState).
+
+
+place_remain_final_pieces(0,GameState, GameState) :- !.
+place_remain_final_pieces(
+    N,
+    game_state(Mode, BoardSize, PlayerInfo1, player_info(Id2, Last_move2, Score2, Board2), CurrentPlayer), 
+    FinalGameState
+):-
+    N > 0,
+    valid_moves(game_state(Mode, BoardSize, PlayerInfo1, player_info(Id2, Last_move2, Score2, Board2), CurrentPlayer), ValidMoves),
+    random_select(RandomMove, ValidMoves, _Rest),
+    format('RandomMove ~w', [RandomMove]),
+
+    move(game_state(Mode, BoardSize, PlayerInfo1, player_info(Id2, Last_move2, Score2, Board2), CurrentPlayer),  moviment(RandomMove, Last_move2), NewGameState),
+    Remain is N - 1,
+    place_remain_final_pieces(Remain, NewGameState, FinalGameState).
+
+    
+%---------------------------------------------------
+%---------------------------------------------------
+
+%HANDLE GAME MOVE
+
+%---------------------------------------------------
+%---------------------------------------------------
+
+%Read Move
+
+read_line_to_string(String) :-
     get_char(Char),
-    char_code(Char, Code),
-    process(Code, Codes).
+    process(Char, String).
 
-process(10, []). % código ASCII para newline (10)
-process(-1, []). % código ASCII para end_of_file (-1)
-process(Code, [Code | Rest]) :-
-    read_line_to_codes(Rest).
-
-read_move(moviment(Move, Symbol)):-
-    Symbol = 'X',
-    write('Enter your move (example: 2B): '),
-    read_line_to_codes(Move).
-    %format('The character codes are: ~w~n', [Move]).
+process('\n', []). % código ASCII para newline (10)
+process(Char, [Char | Tail]) :-
+    read_line_to_string(Tail).
 
 %---------------------------------------------------   
 
-move(NewState, game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer), moviment(Move,Symbol)):-
+move(game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer), moviment(Move,Symbol), NewState):-
     validate_move(moviment(Move,_), board_size(Width, Height), PlayerInfo1), %passa um PlayerInfo qualquer para validar se é uma posição valida no board
     !, 
     execute_move(moviment(Move,Symbol), PlayerInfo1, PlayerInfo2, UpdateInfo1, UpdateInfo2), 
 
-    NextPlayer is (3 - CurrentPlayer),
-    NewState = game_state(Mode, board_size(Width, Height), UpdateInfo1, UpdateInfo2, NextPlayer).
+    NewState = game_state(Mode, board_size(Width, Height), UpdateInfo1, UpdateInfo2, CurrentPlayer).
 
-move(NewState, GameState, _):-
-    write('Invalid move. Please try again.\nEnter exactly two characters and make sure it is a free space on the board!\n'),
+move(GameState, moviment(_,Symbol), NewState):-
+    write('\nInvalid move.\nEnter exactly two characters and make sure it is a free space on the board!\n'),
     nl,
-    clear_buffer,
-    read_move(NewMove),
-    move(NewState, GameState, NewMove).
+    choose_move(GameState, moviment(NewMove,Symbol)),
+    move(GameState, moviment(NewMove,Symbol), NewState).
 
 
 %--------------------------------------------------- 
 
 %Validate Move
 
-validate_move(moviment([RowCode, ColCode], _), board_size(Width, Height), player_info(_, _, _, Board)):-
-    length([RowCode, ColCode], 2),
+validate_move(moviment([RowChar, ColChar], _), board_size(Width, Height), player_info(_, _, _, Board)):-
+    length([RowChar, ColChar], 2),
     %write('Lenght Valid\n'),
+
+    char_code(RowChar, RowCode),
+    char_code(ColChar, ColCode),
 
     Row is RowCode - 48,    % '1'-'9'
     Col is ColCode - 64,    % 'A'-'Z'
 
     validate_range(Row, Col, board_size(Width, Height)),
 
-    find_cellcode(Row, ColCode, Board, CellCode),
+    find_cellcode(Row, ColChar, Board, CellCode),
     validate_free_space(CellCode).
 
 find_index(Value, List, Index) :-
@@ -59,15 +139,13 @@ find_index(Value, List, Index) :-
 %validate if it is in the Row Col range 
 validate_range(Row, Col, board_size(Width, Height)):-
 
-    input_checker(1, Height, Row),
-    input_checker(1, Width, Col).
+    input_checker(1, Height, Col),
+    input_checker(1, Width, Row).
     %write('Move in a valid range\n').
 
 %validate if it is a free space in the board
 
-find_cellcode(RowNumber, Col, board(ShuffledNumbers, ShuffledLetters, Cells), CellCode):-
-
-    char_code(ColChar, Col), 
+find_cellcode(RowNumber, ColChar, board(ShuffledNumbers, ShuffledLetters, Cells), CellCode):-
 
     %format('The character Row is ~w and Col ~w ~n', [RowNumber, ColChar]),
 
@@ -77,17 +155,17 @@ find_cellcode(RowNumber, Col, board(ShuffledNumbers, ShuffledLetters, Cells), Ce
     find_index(RowNumber, ShuffledNumbers, RowIndex),
     %format('The index Row is ~w~n', [RowIndex]),
     
-    nth1(RowIndex, Cells, RowList),  % Get the row in the board
-    nth1(ColIndex, RowList, Cell),   % Get the cell in the row 
+    nth1(ColIndex, Cells, RowList),  % Get the row in the board
+    %format('RowList ~w', [RowList]),
+    nth1(RowIndex, RowList, Cell),   % Get the cell in the row 
     
     char_code(Cell, CellCode).
     %format('The character code is: ~w~n', [CellCode]).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
 
 validate_free_space(45):- 
-    write('Free Space, Move Valid!\n').
+    write('\nFree Space, Move Valid!\n').
 
 %---------------------------------------------------
-%---------------------------------------------------   
 
 %execute move - update the users board and score
 
@@ -97,17 +175,18 @@ execute_move(moviment(Move,Symbol), player_info(_, Last_move1, _, Board1), playe
     update_board(moviment(Move,Symbol),Board2, NewBoard2),
 
     NewScore1 is 0, NewScore2 is 0,
-    count_score(NewBoard1, NewScore1),
-    count_score(NewBoard2, NewScore2),
+    %count_score(NewBoard1, NewScore1),
+    %write('Moving to the other player score\n'),
+    %count_score(NewBoard2, NewScore2),
 
     UpdateInfo1  = player_info(1, Last_move1, NewScore1, NewBoard1),
     UpdateInfo2  = player_info(2, Last_move2, NewScore2, NewBoard2).
 
 %---------------------------------------------------  
 
-update_board(moviment([RowCode, ColCode],Symbol), board(ShuffledNumbers, ShuffledLetters, Cells), NewBoard):-
+update_board(moviment([RowChar, ColChar],Symbol), board(ShuffledNumbers, ShuffledLetters, Cells), NewBoard):-
 
-    char_code(ColChar, ColCode),
+    char_code(RowChar, RowCode),
     Row is RowCode - 48,
 
     find_index(ColChar, ShuffledLetters, ColIndex),
@@ -115,9 +194,9 @@ update_board(moviment([RowCode, ColCode],Symbol), board(ShuffledNumbers, Shuffle
     find_index(Row, ShuffledNumbers, RowIndex),
     %format('The index Row is ~w~n', [RowIndex]),
 
-    nth1(RowIndex,Cells, OldRow),
-    update_board_aux(OldRow, ColIndex, Symbol, NewRow),
-    update_board_aux(Cells, RowIndex, NewRow, NewCells),
+    nth1(ColIndex,Cells, OldRow),
+    update_board_aux(OldRow, RowIndex, Symbol, NewRow),
+    update_board_aux(Cells, ColIndex, NewRow, NewCells),
 
     NewBoard = board(ShuffledNumbers, ShuffledLetters, NewCells).
 
@@ -127,49 +206,79 @@ update_board_aux([Head|Tail], Index, NewInsert, [Head|NewTail]) :-
     Index > 1, 
     NextIndex is Index - 1,
     update_board_aux(Tail, NextIndex, NewInsert, NewTail).
+ 
+%---------------------------------------------------
+%---------------------------------------------------
 
-%---------------------------------------------------  
+%HANDLE GAME SCORE
+
+%---------------------------------------------------
+%---------------------------------------------------
 
 %count the total score for a board considering lines (Row and Column), diagonal and squares
-
 count_score(board(_, _, Cells), Score):- 
     %lines
-    score_lines(Cells, RowScore),
-    transpose(Cells, Ts),
-    score_lines(Ts,ColScore),
+    write('Estou sendo chamado\n'),
+    score_lines(Cells, Score),
+    format('Score: ~w\n', [Score]),
+    format('Cells: ~w\n', [Cells]).
+
+    %transpose(Cells, Ts),
+    %format('Transpose ~w\n', [Ts]),
+    %score_lines(Ts,ColScore),
 
     %diagonal
     %squares
 
-    Score is RowScore + ColScore.
+    %Score is RowScore + ColScore.
 
 %---------------------------------------------------  
 
-%Line Case
+%LINE CASE
 
-score_lines([], 0).
-score_lines([Line | Rest], TotalScore) :-
-    score_line(Line, LineScore),
-    score_lines(Rest, RestScore),
-    TotalScore is LineScore + RestScore.
+%---Main Flow---
+
+%Base Case
+score_lines([], 0):- write('Finaly here\n').
 
 %Recursive Case
-score_line([A,A,A,A |Tail], Score):-
-    A \= '-',
-    score_line([A,A,A | Tail], NewScore),
-    Score is NewScore + 1.
+score_lines([Line | Rest], TotalScore) :-
+    format('Line ~w and Rest ~w\n', [Line, Rest]),
+    score_line(Line, LineScore),
+    format('Line Score: ~w\n', [LineScore]),
+    score_lines(Rest, RestScore),
+    format('LineScore ~w & RestScore ~w\n', [LineScore,RestScore]),
+    sum_score(LineScore, RestScore, TotalScore).
 
-score_line([_ | Tail], Score) :-
-    score_line(Tail, Score).
+sum_score(LineScore, RestScore, TotalScore):-
+    TotalScore is LineScore + RestScore,
+    format('LineScore ~w & RestScore ~w & TotalScore ~w\n', [LineScore,RestScore,TotalScore]).
+
+%---Auxiliar Flow----
 
 %Base Case
 score_line(Line, 0) :-
     length(Line, Len),
-    Len < 4.
+    Len < 4, 
+    format('Too short Line ~w & Len ~w\n', [Line, Len]), !.
+
+%Recursive Case with points
+score_line([A,A,A,A|_Tail], Score):-
+    format('A is ~w\n', [A]),
+    A \= '-',
+    write('Find one point\n'),
+    score_line([A,A,A|_Tail], NewScore),
+    format('NewScore ~w & Score ~w\n', [NewScore, Score]),
+    Score is NewScore + 1.
+
+%Recursive Case without points
+score_line([_|Tail], Score) :-
+    %write('Nothing here sorry :c\n'),
+    score_line(Tail, Score).
 
 %--------------------------------------------------- 
 
-%Diagonal Case -- under implementation
+%DIAGONAL CASE -- under implementation
 
 list_diag1([], []).
 list_diag1([[E|_]|Ess], [E|Ds]) :-
@@ -184,15 +293,6 @@ list_diag2(Ess,Ds) :-
 
 %--------------------------------------------------- 
 
-%Square Case
+%SQUARE CASE
     
-%--------------------------------------------------- 
 %---------------------------------------------------   
-
-%general implementation of the inputs_handlers, but always repeats the message twice for some reason :c
-input_checker(Min, Max, Value) :-
-    between(Min, Max, Value).
-input_checker(_):-
-    write('Invalid option. Try again.\n'),
-    clear_buffer,
-    fail. 
