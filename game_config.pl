@@ -1,5 +1,5 @@
 %/usr/local/sicstus4.9.0/bin/sicstus
-%consult('/Users/tatianalin/Downloads/3ANO/PFL/Training/PROLOG/game_config.pl').
+%consult('/Users/tatianalin/Downloads/3ANO/PFL/Training/PROLOG/doblin/game_config.pl').
 
 :- use_module(library(between)).
 :- use_module(library(random)).
