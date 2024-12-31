@@ -37,6 +37,14 @@ print_board_rows([Letter|Tail], [CellHead|CellTail], Width) :-
 
 %-----------------------------------------------
 
+%O player vai ser humano(1) quando o Mode for 1 | quando o Mode for 2 e o CurrentPlayer for 1 | quando o Mode for 3 e o CurrentPlayer for 2
+%O player vai ser computer(1) quando o Mode for 4 | quando o Mode for 2 e o CurrentPlayer for 2 | quando o Mode for 3 e o CurrentPlayer for 1
+
+define_player(_GameState, Player):-
+    Player is 1. %Por enquanto, só temos o H/H
+
+%-----------------------------------------------
+
 %Next Player
 
 next_player(game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer), NewState):-
@@ -65,9 +73,14 @@ game_over(_,_):-
     fail.
 
 %---------------------------------------------------
+ 
+
+%value(+GameState, +Player, -Value).
+
+%---------------------------------------------------
 %---------------------------------------------------
 
-%Valid Moves -- falta implementar corretamente fiz uma gambiarra
+%Valid Moves -- falta implementar corretamente fiz uma gambiarra para testar o game_over
 
 valid_moves(_, ValidMoves):-
 

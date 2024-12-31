@@ -27,7 +27,8 @@ welcome:-
     write('            Choose your mode!                                      \n'),
     write('            [1]     Human vs. Human                                \n'),
     write('            [2]     Human vs. Computer                             \n'),
-    write('            [3]     Computer vs. Computer                          \n'),
+    write('            [3]     Computer vs. Human                             \n'),
+    write('            [4]     Computer vs. Computer                          \n'),
     write('                                                                   \n'),
     write('            Other:                                                 \n'),
     write('            [4]     RULES                                          \n'),
@@ -137,12 +138,16 @@ handle_mode(2, _Last_move1, _Last_move2):-
     game_human(1, _Last_move1),
     write('game_mode 2 to be defined').
 
-%Handle Mode PC/PC 
+%Handle Mode PC/H 
 handle_mode(3, _Last_move1, _Last_move2):- 
     write('game_mode 3 to be defined').
 
+%Handle Mode PC/PC 
+handle_mode(4, _Last_move1, _Last_move2):- 
+    write('game_mode 4 to be defined').
+
 %Handle Mode View Game Rules 
-handle_mode(4):- 
+handle_mode(5):- 
     game_rules, %fazer que ao clicar em [E] voltar para o menu
     repeat,
     get_char(Char),
@@ -152,7 +157,7 @@ handle_mode(4):-
     game_start.
 
 %Handle Mode View info About Project
-handle_mode(5):-
+handle_mode(6):-
     info_about_project,
     repeat,
     get_char(Char),

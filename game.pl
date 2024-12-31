@@ -14,33 +14,32 @@ game_cycle(GameState):-
     congratulate(Winner).
 
 game_cycle(GameState):-
-    
-    %O predicado original era choose_move(GameState, Player, UserMove), mas ainda so temos o Player HxH entao omiti Player por agora
+
+    define_player(GameState, Player),
 
     %Iteration X
-    choose_move(GameState, moviment(UserMoveX, 'X')), 
+    choose_move(GameState, Player, moviment(UserMoveX, 'X')), 
     move(GameState, moviment(UserMoveX, 'X'), PartialGameState),
     display_game(PartialGameState),
     
     %Iteration O
-    choose_move(GameState, moviment(UserMoveO, 'O')), 
+    choose_move(GameState, Player, moviment(UserMoveO, 'O')), 
     move(PartialGameState, moviment(UserMoveO, 'O'), FinalGameState),
 
     next_player(FinalGameState, NewGameState),
     display_game(NewGameState), !,
     game_cycle(NewGameState).
 
-choose_move(_, moviment(Move, Symbol)):-
+%choose_move Human - interaction to select move
+choose_move(_GameState, 1, moviment(Move, Symbol)):-
     format('Enter your move for ~w (example: 2B): ', [Symbol]),
     read_line_to_string(Move).
     %format('You entered: ~w~n', [Move]).
 
-%choose_move(GameState, human, Move):-
-    %interaction to select move
-
+%choose_move Computer-Level
 %choose_move(GameState, computer-Level, Move):-
     %valid_moves(GameState, ValidMoves),
-    %choose_move(Level, GameState, ValidMoves, Move).
+    %choose_move(Level, GameState, ValidMoves, Move). %aqui vê o nível de dificuldade
 
 %valid_moves(GameState, Moves):-
     %findall(Move, move(GameState, Move, NewState), Moves).
