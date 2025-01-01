@@ -1,6 +1,7 @@
 %/usr/local/sicstus4.9.0/bin/sicstus
 %consult('/Users/tatianalin/Downloads/3ANO/PFL/Training/PROLOG/doblin/game_config.pl').
-
+%consult('/Users/tatianalin/Downloads/3ANO/PFL/Training/PROLOG/doblin/move.pl').
+%consult('/Users/tatianalin/Downloads/3ANO/PFL/Training/PROLOG/doblin/game.pl').
 %--------------------------------------------------
 
 welcome:-

@@ -57,7 +57,7 @@ place_final_pieces(
     FinalGameState
 ):-
     N > 0,
-    choose_move(game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1), PlayerInfo2, CurrentPlayer), moviment(UserMove, Last_move1)),
+    choose_move(game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1), PlayerInfo2, CurrentPlayer), _, moviment(UserMove, Last_move1)),
     move(game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1), PlayerInfo2, CurrentPlayer), moviment(UserMove, Last_move1), NewGameState),
     Remain is N - 1,
     display_game(NewGameState),
@@ -119,6 +119,7 @@ move(GameState, moviment(_,Symbol), NewState):-
 %Validate Move
 
 validate_move(moviment([RowChar, ColChar], _), board_size(Width, Height), player_info(_, _, _, Board)):-
+    write('Validating move: '), write([RowChar, ColChar]), nl,
     length([RowChar, ColChar], 2),
     %write('Lenght Valid\n'),
 
@@ -175,9 +176,9 @@ execute_move(moviment(Move,Symbol), player_info(_, Last_move1, _, Board1), playe
     update_board(moviment(Move,Symbol),Board2, NewBoard2),
 
     NewScore1 is 0, NewScore2 is 0,
-    %count_score(NewBoard1, NewScore1),
-    %write('Moving to the other player score\n'),
-    %count_score(NewBoard2, NewScore2),
+    count_score(NewBoard1, NewScore1),
+    write('Moving to the other player score\n'),
+    count_score(NewBoard2, NewScore2),
 
     UpdateInfo1  = player_info(1, Last_move1, NewScore1, NewBoard1),
     UpdateInfo2  = player_info(2, Last_move2, NewScore2, NewBoard2).

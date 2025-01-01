@@ -82,14 +82,64 @@ game_over(_,_):-
 
 %Valid Moves -- falta implementar corretamente fiz uma gambiarra para testar o game_over
 
-valid_moves(_, ValidMoves):-
+%valid_moves(_, ValidMoves):-
 
     %Use this one to avoid the game_over as it has more than 8 elements
-    ValidMoves = [['1', 'A'], ['2', 'A'], ['3', 'A'], ['4', 'A'], ['1', 'B'], ['2', 'B'], ['4', 'B'], ['3', 'B'], ['X','X']].
+    %ValidMoves = [['1', 'A'], ['2', 'A'], ['3', 'A'], ['4', 'A'], ['1', 'B'], ['2', 'B'], ['4', 'B'], ['3', 'B'], ['X','X']].
 
     %Use this one to access the game_over as it has 8 elements
     %ValidMoves = [['1', 'A'], ['2', 'A'], ['3', 'A'], ['4', 'A'], ['1', 'B'], ['2', 'B'], ['4', 'B'], ['3', 'B']].
     %format('ValidMoves -- ~w\n', [ValidMoves]).
 
+
 %---------------------------------------------------
 %---------------------------------------------------
+
+% generate_cells(+Width, +Height, -ListOfCells)
+%todas as células do tabuleiro 
+generate_cells(Width, Height, ListOfCells) :-
+    findall(
+        [RowChar, ColChar],
+        (
+            between(1, Height, Row),                
+            between(1, Width, Col), 
+
+            RowCode is Row + 48,                     
+            ColCode is Col + 64, 
+
+            char_code(RowChar, RowCode),            
+            char_code(ColChar, ColCode)              
+        ),
+        ListOfCells
+    ).
+
+
+% valid_moves(+GameState, -ListOfMoves)
+valid_moves(game_state(_, board_size(Width, Height), PlayerInfo, _, _), ListOfMoves) :-
+    write('Width: '), write(Width), 
+    nl,
+    write('Height: '), write(Height), 
+    nl,
+
+    integer(Width), integer(Height),
+
+    generate_cells(Width, Height, AllCells),
+    write('AllCells: '), write(AllCells), 
+    nl,
+
+    % aqui que filtra os moves que sao válidos
+    findall(
+        [RowChar, ColChar],
+        (
+            member([RowChar, ColChar], AllCells), % itera pelas cells
+            write('Checking cell: '), write([RowChar, ColChar]), nl, 
+            validate_move(moviment([RowChar, ColChar], _), board_size(Width, Height), PlayerInfo), 
+            write('Valid cell: '), write([RowChar, ColChar]), nl 
+        ),
+        ListOfMoves
+    ),
+    write('ListOfMoves: '), write(ListOfMoves), nl. 
+
+%---------------------------------------------------
+%---------------------------------------------------
+
