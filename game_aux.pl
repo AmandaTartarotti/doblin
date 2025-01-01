@@ -21,7 +21,7 @@ display_game(game_state(_, board_size(Width, _), PlayerInfo1, PlayerInfo2, Curre
     print_player_info(PlayerInfo1, Width), nl,
     print_player_info(PlayerInfo2, Width), nl. 
 
-print_player_info(player_info(Player, _, Score, Board), Width) :-
+print_player_info(player_info(Player, _, Score, Board,_), Width) :-
     format('Player ~w score: ~w\n', [Player, Score]),
     print_player_board(Board, Width).
 
@@ -38,10 +38,19 @@ print_board_rows([Letter|Tail], [CellHead|CellTail], Width) :-
 %-----------------------------------------------
 
 %O player vai ser humano(1) quando o Mode for 1 | quando o Mode for 2 e o CurrentPlayer for 1 | quando o Mode for 3 e o CurrentPlayer for 2
-%O player vai ser computer(1) quando o Mode for 4 | quando o Mode for 2 e o CurrentPlayer for 2 | quando o Mode for 3 e o CurrentPlayer for 1
+%O player vai ser computer(2) quando o Mode for 4 | quando o Mode for 2 e o CurrentPlayer for 2 | quando o Mode for 3 e o CurrentPlayer for 1
 
-define_player(_GameState, Player):-
-    Player is 1. %Por enquanto, só temos o H/H
+%Case H/H
+define_player(game_state(1, _, _, _, _), Player):- Player is 1.
+
+%Case H/PC
+define_player(game_state(2, _, _, _, CurrentPlayer), Player):- Player is CurrentPlayer.
+
+%Case PC/H
+define_player(game_state(3, _, _, _, CurrentPlayer), Player):- Player is 3 - CurrentPlayer.
+
+%Case PC/PC
+define_player(game_state(4, _, _, _, _), Player):- Player is 2.
 
 %-----------------------------------------------
 
