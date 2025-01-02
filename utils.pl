@@ -13,7 +13,11 @@ game_configuration(_game_mode, _board_size, _player_info1, _player_info2).
 
 game_state(_game_mode, _board_size, _player_info1,  _player_info2, _current_player).
 
-player_info( _Player, _Last_move, _Score, _Board).
+%player_info( _Player, _Last_move, _Score, _Board).
+player_info( _PlayerId, _Last_move, _Score, _Board, _Level).
+%Level 0 - human
+%Level 1 - machine level 1
+%Level 2 - machine level 2
 
 board(_Numbers, _Letters, _Cells).
 

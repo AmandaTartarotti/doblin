@@ -1,7 +1,6 @@
-%/usr/local/sicstus4.9.0/bin/sicstus
-%consult('/Users/tatianalin/Downloads/3ANO/PFL/Training/PROLOG/doblin/game_config.pl').
-%consult('/Users/tatianalin/Downloads/3ANO/PFL/Training/PROLOG/doblin/move.pl').
-%consult('/Users/tatianalin/Downloads/3ANO/PFL/Training/PROLOG/doblin/game.pl').
+
+
+
 %--------------------------------------------------
 
 welcome:-
@@ -32,8 +31,8 @@ welcome:-
     write('            [4]     Computer vs. Computer                          \n'),
     write('                                                                   \n'),
     write('            Other:                                                 \n'),
-    write('            [4]     RULES                                          \n'),
-    write('            [5]     INFORMATION ABOUT PROJECT                      \n'),
+    write('            [5]     RULES                                          \n'),
+    write('            [6]     INFORMATION ABOUT PROJECT                      \n'),
     write('-------------------------------------------------------------------\n'),
     write('                     Ready to start? Let\'s go!                    \n'),
     nl.
@@ -95,7 +94,8 @@ info_about_project:-
 %Allows configuring the game type (H/H, H/PC, PC/H, or PC/PC), difficulty level(s) to be used and define each user last moves 
 game_menu(GameConfig):-
     welcome,
-    game_mode(Mode, Last_move1, Last_move2), % Obter o modo de jogo e os movimentos finais dos jogadores
+    %game_mode(Mode, Last_move1, Last_move2), % Obter o modo de jogo e os movimentos finais dos jogadores
+    game_mode(Mode, Last_move1, Last_move2, Level1, Level2), % Obter o modo de jogo e os movimentos finais dos jogadores
     nl,
     game_board(Width, Height),         % Obter as dimensões do tabuleiro
     BoardSize = board_size(Width, Height),
@@ -111,8 +111,10 @@ game_menu(GameConfig):-
     generate_board(Width, Height, Board2), % Cria o tabuleiro para o jogador 2
     
     %Criar informações dos jogadores
-    PlayerInfo1  = player_info(1, Last_move1, 0, Board1),
-    PlayerInfo2  = player_info(2, Last_move2, 0, Board2),
+    %PlayerInfo1  = player_info(1, Last_move1, 0, Board1),
+    %PlayerInfo2  = player_info(2, Last_move2, 0, Board2),
+    PlayerInfo1  = player_info(1, Last_move1, 0, Board1, Level1),
+    PlayerInfo2  = player_info(2, Last_move2, 0, Board2, Level2),
 
     %Criar a configuração do jogo
     GameConfig  = game_configuration(Mode, BoardSize, PlayerInfo1, PlayerInfo2).
@@ -123,29 +125,43 @@ game_menu(GameConfig):-
 %GAME MODE HANDLER
 
 %Return the game mode (H/H, H/PC, PC/H, or PC/PC) and the players defined last_move
-game_mode(Mode, Last_move1, Last_move2):-  
+%game_mode(Mode, Last_move1, Last_move2):-  
+game_mode(Mode, Last_move1, Last_move2, Level1, Level2):-  
     get_number(Mode),
-    handle_mode(Mode, Last_move1, Last_move2).
+    %handle_mode(Mode, Last_move1, Last_move2).
+    handle_mode(Mode, Last_move1, Last_move2, Level1, Level2).
 
 %-----------------------------------------------
 
 %Handle Mode H/H 
-handle_mode(1, Last_move1, Last_move2):- 
-    game_human(1, Last_move1),
-    game_human(2, Last_move2).
+%handle_mode(1, Last_move1, Last_move2):- 
+ %   game_human(1, Last_move1),
+ %   game_human(2, Last_move2).
+handle_mode(1, Last_move1, Last_move2, Level1, Level2):- 
+    game_human(1, Last_move1, Level1),
+    game_human(2, Last_move2, Level2).
 
 %Handle Mode H/PC 
-handle_mode(2, _Last_move1, _Last_move2):- 
-    game_human(1, _Last_move1),
-    write('game_mode 2 to be defined').
+%handle_mode(2, _Last_move1, _Last_move2):- 
+%   game_human(1, _Last_move1),
+%   write('game_mode 2 to be defined').
+handle_mode(2, Last_move1, Last_move2, Level1, Level2):- 
+    game_human(1, Last_move1, Level1),
+    game_machine(2, Last_move2, Level2).
 
 %Handle Mode PC/H 
-handle_mode(3, _Last_move1, _Last_move2):- 
-    write('game_mode 3 to be defined').
+%handle_mode(3, _Last_move1, _Last_move2):- 
+%    write('game_mode 3 to be defined').
+handle_mode(3, Last_move1, Last_move2, Level1, Level2):- 
+    game_machine(1, Last_move1, Level1),
+    game_human(2, Last_move2, Level2).
 
 %Handle Mode PC/PC 
-handle_mode(4, _Last_move1, _Last_move2):- 
-    write('game_mode 4 to be defined').
+%handle_mode(4, _Last_move1, _Last_move2):- 
+%    write('game_mode 4 to be defined').
+handle_mode(4, Last_move1, Last_move2, Level1, Level2):- 
+    game_machine(1, Last_move1, Level1),
+    game_machine(2, Last_move2, Level2).
 
 %Handle Mode View Game Rules 
 handle_mode(5):- 
@@ -173,9 +189,32 @@ handle_mode(_):-
 
 %--------------------------------------------------
 
-%Get Players last moves
-game_human(Player, Last_move):-
+%Get Machine Player last moves
+game_machine(Player, Last_move, Level):-
+    define_level(Player, Level),
+    random_last_moves(Last_move),
+    format('\nPlayer ~w choose as the last move ~w\n', [Player, Last_move]).
+
+%Generate the machine last moves
+random_last_moves(MoveSymbol) :-
+    random_select(Move, [1,2], _Rest),
+    get_symbol(Move, MoveSymbol).
+
+%Defines the machine difficulty level
+define_level(Player, Level):-
+    repeat,
     clear_buffer,
+    format('\nWhat will be the PC Player ~w difficulty level?\n', [Player]),
+    write('1 - Level Easy\n'),
+    write('2 - Level Hard\n'),
+    get_number(Level),
+    input_checker(1, 2, Level),
+    format('You choose as the PC difficulty level ~w \n', [Level]).
+
+
+%Get Human Player last moves
+game_human(Player, Last_move, Level):-
+    Level is 0,
     format('\nHey Player ~w', [Player]),    
     nl,
     player_last_moves(Last_move),
@@ -184,7 +223,8 @@ game_human(Player, Last_move):-
 %player_last_moves 
 player_last_moves(MoveSymbol) :-
     repeat,
-    write('What will be your last 4 moves?\n'),
+    clear_buffer,
+    write('\nWhat will be your last 4 moves?\n'),
     write('1 - Empty places\n'),
     write('2 - Joker places\n'),
     get_number(Move),
@@ -192,7 +232,7 @@ player_last_moves(MoveSymbol) :-
     get_symbol(Move, MoveSymbol).
 
 %Empyt places symbol
-get_symbol(1,MoveSymbol):- MoveSymbol = ' '.
+get_symbol(1,MoveSymbol):- MoveSymbol = '*'.
 
 %Joker places symbol
 get_symbol(2,MoveSymbol):- MoveSymbol = '@'.

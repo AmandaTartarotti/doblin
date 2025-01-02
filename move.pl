@@ -25,7 +25,8 @@ congratulate(Winner):-
 
 %---------------------------------------------------
 
-define_winner(game_state(_, _, player_info(_, _, Score1, _), player_info(_, _, Score2, _), _), Winner):-
+%define_winner(game_state(_, _, player_info(_, _, Score1, _), player_info(_, _, Score2, _), _), Winner):-
+define_winner(game_state(_, _, player_info( _, _, Score1, _, _), player_info( _, _, Score2, _, _), _), Winner):-
     ScoreFinal is Score1 - Score2,
     compare_score(ScoreFinal, Winner).
 
@@ -53,12 +54,15 @@ execute_last_moves(game_state(Mode, BoardSize, PlayerInfo1, PlayerInfo2, Current
 place_final_pieces(0, GameState, GameState) :- !.
 place_final_pieces(
     N, 
-    game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1), PlayerInfo2, CurrentPlayer),
+    %game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1), PlayerInfo2, CurrentPlayer),
+    game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1, Level1), PlayerInfo2, CurrentPlayer),
     FinalGameState
 ):-
     N > 0,
-    choose_move(game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1), PlayerInfo2, CurrentPlayer), _, moviment(UserMove, Last_move1)),
-    move(game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1), PlayerInfo2, CurrentPlayer), moviment(UserMove, Last_move1), NewGameState),
+    %choose_move(game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1), PlayerInfo2, CurrentPlayer), _, moviment(UserMove, Last_move1)),
+    %move(game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1), PlayerInfo2, CurrentPlayer), moviment(UserMove, Last_move1), NewGameState),
+    choose_move(game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1,Level1), PlayerInfo2, CurrentPlayer), moviment(UserMove, Last_move1)),
+    move(game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1,Level1), PlayerInfo2, CurrentPlayer), moviment(UserMove, Last_move1), NewGameState),
     Remain is N - 1,
     display_game(NewGameState),
     place_final_pieces(Remain, NewGameState, FinalGameState).
@@ -67,15 +71,18 @@ place_final_pieces(
 place_remain_final_pieces(0,GameState, GameState) :- !.
 place_remain_final_pieces(
     N,
-    game_state(Mode, BoardSize, PlayerInfo1, player_info(Id2, Last_move2, Score2, Board2), CurrentPlayer), 
+    %game_state(Mode, BoardSize, PlayerInfo1, player_info(Id2, Last_move2, Score2, Board2), CurrentPlayer), 
+    game_state(Mode, BoardSize, PlayerInfo1, player_info(Id2, Last_move2, Score2, Board2,Level2), CurrentPlayer), 
     FinalGameState
 ):-
     N > 0,
-    valid_moves(game_state(Mode, BoardSize, PlayerInfo1, player_info(Id2, Last_move2, Score2, Board2), CurrentPlayer), ValidMoves),
+    %valid_moves(game_state(Mode, BoardSize, PlayerInfo1, player_info(Id2, Last_move2, Score2, Board2), CurrentPlayer), ValidMoves),
+    valid_moves(game_state(Mode, BoardSize, PlayerInfo1, player_info(Id2, Last_move2, Score2, Board2,Level2), CurrentPlayer), ValidMoves),
     random_select(RandomMove, ValidMoves, _Rest),
     format('RandomMove ~w', [RandomMove]),
 
-    move(game_state(Mode, BoardSize, PlayerInfo1, player_info(Id2, Last_move2, Score2, Board2), CurrentPlayer),  moviment(RandomMove, Last_move2), NewGameState),
+    %move(game_state(Mode, BoardSize, PlayerInfo1, player_info(Id2, Last_move2, Score2, Board2), CurrentPlayer),  moviment(RandomMove, Last_move2), NewGameState),
+    move(game_state(Mode, BoardSize, PlayerInfo1, player_info(Id2, Last_move2, Score2, Board2,Level2), CurrentPlayer),  moviment(RandomMove, Last_move2), NewGameState),
     Remain is N - 1,
     place_remain_final_pieces(Remain, NewGameState, FinalGameState).
 
@@ -118,7 +125,8 @@ move(GameState, moviment(_,Symbol), NewState):-
 
 %Validate Move
 
-validate_move(moviment([RowChar, ColChar], _), board_size(Width, Height), player_info(_, _, _, Board)):-
+%validate_move(moviment([RowChar, ColChar], _), board_size(Width, Height), player_info(_, _, _, Board)):-
+validate_move(moviment([RowChar, ColChar], _), board_size(Width, Height), player_info(_, _, _, Board, _)):-
     write('Validating move: '), write([RowChar, ColChar]), nl,
     length([RowChar, ColChar], 2),
     %write('Lenght Valid\n'),
@@ -170,18 +178,23 @@ validate_free_space(45):-
 
 %execute move - update the users board and score
 
-execute_move(moviment(Move,Symbol), player_info(_, Last_move1, _, Board1), player_info(_, Last_move2, _, Board2), UpdateInfo1, UpdateInfo2):-
+%execute move - update the users board and score
+
+%execute_move(moviment(Move,Symbol), player_info(_, Last_move1, _, Board1), player_info(_, Last_move2, _, Board2), UpdateInfo1, UpdateInfo2):-
+execute_move(moviment(Move,Symbol), player_info(_, Last_move1, _, Board1, Level1), player_info(_, Last_move2, _, Board2, Level2), UpdateInfo1, UpdateInfo2):-
 
     update_board(moviment(Move,Symbol),Board1, NewBoard1),
     update_board(moviment(Move,Symbol),Board2, NewBoard2),
 
     NewScore1 is 0, NewScore2 is 0,
-    count_score(NewBoard1, NewScore1),
-    write('Moving to the other player score\n'),
-    count_score(NewBoard2, NewScore2),
+    %count_score(NewBoard1, NewScore1),
+    %write('Moving to the other player score\n'),
+    %count_score(NewBoard2, NewScore2),
 
-    UpdateInfo1  = player_info(1, Last_move1, NewScore1, NewBoard1),
-    UpdateInfo2  = player_info(2, Last_move2, NewScore2, NewBoard2).
+    %UpdateInfo1  = player_info(1, Last_move1, NewScore1, NewBoard1),
+    %UpdateInfo2  = player_info(2, Last_move2, NewScore2, NewBoard2).
+    UpdateInfo1  = player_info(1, Last_move1, NewScore1, NewBoard1, Level1),
+    UpdateInfo2  = player_info(2, Last_move2, NewScore2, NewBoard2, Level2).
 
 %---------------------------------------------------  
 

@@ -37,7 +37,8 @@ choose_move(_GameState, 1, moviment(Move, Symbol)):-
     %format('You entered: ~w~n', [Move]).
 
 %choose_move Computer-Level
-%choose_move(GameState, computer-Level, Move):-
+choose_move(_GameState, 2, _Move):-
+    write('Under Implementation').
     %valid_moves(GameState, ValidMoves),
     %choose_move(Level, GameState, ValidMoves, Move). %aqui vê o nível de dificuldade
 
