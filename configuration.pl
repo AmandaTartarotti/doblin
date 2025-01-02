@@ -94,7 +94,6 @@ info_about_project:-
 %Allows configuring the game type (H/H, H/PC, PC/H, or PC/PC), difficulty level(s) to be used and define each user last moves 
 game_menu(GameConfig):-
     welcome,
-    %game_mode(Mode, Last_move1, Last_move2), % Obter o modo de jogo e os movimentos finais dos jogadores
     game_mode(Mode, Last_move1, Last_move2, Level1, Level2), % Obter o modo de jogo e os movimentos finais dos jogadores
     nl,
     game_board(Width, Height),         % Obter as dimensões do tabuleiro
@@ -111,8 +110,6 @@ game_menu(GameConfig):-
     generate_board(Width, Height, Board2), % Cria o tabuleiro para o jogador 2
     
     %Criar informações dos jogadores
-    %PlayerInfo1  = player_info(1, Last_move1, 0, Board1),
-    %PlayerInfo2  = player_info(2, Last_move2, 0, Board2),
     PlayerInfo1  = player_info(1, Last_move1, 0, Board1, Level1),
     PlayerInfo2  = player_info(2, Last_move2, 0, Board2, Level2),
 
@@ -125,40 +122,28 @@ game_menu(GameConfig):-
 %GAME MODE HANDLER
 
 %Return the game mode (H/H, H/PC, PC/H, or PC/PC) and the players defined last_move
-%game_mode(Mode, Last_move1, Last_move2):-  
 game_mode(Mode, Last_move1, Last_move2, Level1, Level2):-  
     get_number(Mode),
-    %handle_mode(Mode, Last_move1, Last_move2).
     handle_mode(Mode, Last_move1, Last_move2, Level1, Level2).
 
 %-----------------------------------------------
 
 %Handle Mode H/H 
-%handle_mode(1, Last_move1, Last_move2):- 
- %   game_human(1, Last_move1),
- %   game_human(2, Last_move2).
 handle_mode(1, Last_move1, Last_move2, Level1, Level2):- 
     game_human(1, Last_move1, Level1),
     game_human(2, Last_move2, Level2).
 
 %Handle Mode H/PC 
-%handle_mode(2, _Last_move1, _Last_move2):- 
-%   game_human(1, _Last_move1),
-%   write('game_mode 2 to be defined').
 handle_mode(2, Last_move1, Last_move2, Level1, Level2):- 
     game_human(1, Last_move1, Level1),
     game_machine(2, Last_move2, Level2).
 
 %Handle Mode PC/H 
-%handle_mode(3, _Last_move1, _Last_move2):- 
-%    write('game_mode 3 to be defined').
 handle_mode(3, Last_move1, Last_move2, Level1, Level2):- 
     game_machine(1, Last_move1, Level1),
     game_human(2, Last_move2, Level2).
 
 %Handle Mode PC/PC 
-%handle_mode(4, _Last_move1, _Last_move2):- 
-%    write('game_mode 4 to be defined').
 handle_mode(4, Last_move1, Last_move2, Level1, Level2):- 
     game_machine(1, Last_move1, Level1),
     game_machine(2, Last_move2, Level2).

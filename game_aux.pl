@@ -78,14 +78,16 @@ print_row([Cell|Tail]) :-
 %O player vai ser humano(1) quando o Mode for 1 | quando o Mode for 2 e o CurrentPlayer for 1 | quando o Mode for 3 e o CurrentPlayer for 2
 %O player vai ser computer(2) quando o Mode for 4 | quando o Mode for 2 e o CurrentPlayer for 2 | quando o Mode for 3 e o CurrentPlayer for 1
 
-%define_player(_GameState, Player):-
-%   Player is 1. %Por enquanto, só temos o H/H
+
 %Case H/H
 define_player(game_state(1, _, _, _, _), Player):- Player is 1.
+
 %Case H/PC
 define_player(game_state(2, _, _, _, CurrentPlayer), Player):- Player is CurrentPlayer.
+
 %Case PC/H
 define_player(game_state(3, _, _, _, CurrentPlayer), Player):- Player is 3 - CurrentPlayer.
+
 %Case PC/PC
 define_player(game_state(4, _, _, _, _), Player):- Player is 2.
 
@@ -132,21 +134,6 @@ game_over(_,_):-
 %---------------------------------------------------
 %---------------------------------------------------
 
-%Valid Moves -- falta implementar corretamente fiz uma gambiarra para testar o game_over
-
-%valid_moves(_, ValidMoves):-
-
-    %Use this one to avoid the game_over as it has more than 8 elements
-    %ValidMoves = [['1', 'A'], ['2', 'A'], ['3', 'A'], ['4', 'A'], ['1', 'B'], ['2', 'B'], ['4', 'B'], ['3', 'B'], ['X','X']].
-
-    %Use this one to access the game_over as it has 8 elements
-    %ValidMoves = [['1', 'A'], ['2', 'A'], ['3', 'A'], ['4', 'A'], ['1', 'B'], ['2', 'B'], ['4', 'B'], ['3', 'B']].
-    %format('ValidMoves -- ~w\n', [ValidMoves]).
-
-
-%---------------------------------------------------
-%---------------------------------------------------
-
 % generate_cells(+Width, +Height, -ListOfCells)
 %todas as células do tabuleiro 
 generate_cells(Width, Height, ListOfCells) :-
@@ -176,7 +163,7 @@ valid_moves(game_state(_, board_size(Width, Height), PlayerInfo, _, _), ListOfMo
     integer(Width), integer(Height),
 
     generate_cells(Width, Height, AllCells),
-    write('AllCells: '), write(AllCells), 
+    %write('AllCells: '), write(AllCells), 
     nl,
 
     % aqui que filtra os moves que sao válidos
@@ -190,8 +177,8 @@ valid_moves(game_state(_, board_size(Width, Height), PlayerInfo, _, _), ListOfMo
             %write('Valid cell: '), write([RowChar, ColChar]), nl 
         ),
         ListOfMoves
-    ),
-    write('ListOfMoves: '), write(ListOfMoves), nl. 
+    ).
+    %write('ListOfMoves: '), write(ListOfMoves), nl. 
 
 %---------------------------------------------------
 %---------------------------------------------------
