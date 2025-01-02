@@ -31,11 +31,10 @@ define_winner(game_state(_, _, player_info( _, _, Score1, _, _), player_info( _,
     compare_score(ScoreFinal, Winner).
 
 
-compare_score(0,Winner):- Winner is 0.
-compare_score(N, Winner):- 
-    N > 0,
-    Winner is 1.
-compare_score(_, Winner):-Winner is 2.
+compare_score(0,0).
+compare_score(N, 1):- 
+    N > 0.
+compare_score(_, 2).
 
 %---------------------------------------------------
 
@@ -107,12 +106,14 @@ process(Char, [Char | Tail]) :-
 
 %---------------------------------------------------   
 
-move(game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer), moviment(Move,Symbol), NewState):-
+move(
+    game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer), 
+    moviment(Move,Symbol), 
+    game_state(Mode, board_size(Width, Height), UpdateInfo1, UpdateInfo2, CurrentPlayer)
+):-
     validate_move(moviment(Move,_), board_size(Width, Height), PlayerInfo1), %passa um PlayerInfo qualquer para validar se é uma posição valida no board
     !, 
-    execute_move(moviment(Move,Symbol), PlayerInfo1, PlayerInfo2, UpdateInfo1, UpdateInfo2), 
-
-    NewState = game_state(Mode, board_size(Width, Height), UpdateInfo1, UpdateInfo2, CurrentPlayer).
+    execute_move(moviment(Move,Symbol), PlayerInfo1, PlayerInfo2, UpdateInfo1, UpdateInfo2).
 
 move(GameState, moviment(_,Symbol), NewState):-
     write('\nInvalid move.\nEnter exactly two characters and make sure it is a free space on the board!\n'),
@@ -178,22 +179,22 @@ validate_free_space(45).
 
 %execute move - update the users board and score
 
-execute_move(moviment(Move,Symbol), player_info(_, Last_move1, _, Board1, Level1), player_info(_, Last_move2, _, Board2, Level2), UpdateInfo1, UpdateInfo2):-
+execute_move(moviment(Move,Symbol), player_info(_, Last_move1, _, Board1, Level1), player_info(_, Last_move2, _, Board2, Level2), player_info(1, Last_move1, NewScore1, NewBoard1, Level1), player_info(2, Last_move2, NewScore2, NewBoard2, Level2)):-
 
     update_board(moviment(Move,Symbol),Board1, NewBoard1),
     update_board(moviment(Move,Symbol),Board2, NewBoard2),
 
-    NewScore1 is 0, NewScore2 is 0,
-    %count_score(NewBoard1, NewScore1),
-    %write('Moving to the other player score\n'),
-    %count_score(NewBoard2, NewScore2),
-
-    UpdateInfo1  = player_info(1, Last_move1, NewScore1, NewBoard1, Level1),
-    UpdateInfo2  = player_info(2, Last_move2, NewScore2, NewBoard2, Level2).
+    count_score(NewBoard1, NewScore1),
+    write('Moving to the other player score\n'),
+    count_score(NewBoard2, NewScore2).
 
 %---------------------------------------------------  
 
-update_board(moviment([RowChar, ColChar],Symbol), board(ShuffledNumbers, ShuffledLetters, Cells), NewBoard):-
+update_board(
+    moviment([RowChar, ColChar],Symbol), 
+    board(ShuffledNumbers, ShuffledLetters, Cells), 
+    board(ShuffledNumbers, ShuffledLetters, NewCells)
+):-
 
     char_code(RowChar, RowCode),
     Row is RowCode - 48,
@@ -205,9 +206,7 @@ update_board(moviment([RowChar, ColChar],Symbol), board(ShuffledNumbers, Shuffle
 
     nth1(ColIndex,Cells, OldRow),
     update_board_aux(OldRow, RowIndex, Symbol, NewRow),
-    update_board_aux(Cells, ColIndex, NewRow, NewCells),
-
-    NewBoard = board(ShuffledNumbers, ShuffledLetters, NewCells).
+    update_board_aux(Cells, ColIndex, NewRow, NewCells).
 
 
 update_board_aux([_|Tail], 1, NewInsert, [NewInsert|Tail]).
@@ -252,38 +251,37 @@ score_lines([], 0):- write('Finaly here\n').
 
 %Recursive Case
 score_lines([Line | Rest], TotalScore) :-
-    format('Line ~w and Rest ~w\n', [Line, Rest]),
+    %format('Line ~w and Rest ~w\n', [Line, Rest]),
     score_line(Line, LineScore),
-    format('Line Score: ~w\n', [LineScore]),
+    %format('Line Score: ~w\n', [LineScore]),
     score_lines(Rest, RestScore),
-    format('LineScore ~w & RestScore ~w\n', [LineScore,RestScore]),
+    %format('LineScore ~w & RestScore ~w\n', [LineScore,RestScore]),
     sum_score(LineScore, RestScore, TotalScore).
 
 sum_score(LineScore, RestScore, TotalScore):-
-    TotalScore is LineScore + RestScore,
-    format('LineScore ~w & RestScore ~w & TotalScore ~w\n', [LineScore,RestScore,TotalScore]).
+    TotalScore is LineScore + RestScore.
+    %format('LineScore ~w & RestScore ~w & TotalScore ~w\n', [LineScore,RestScore,TotalScore]).
 
 %---Auxiliar Flow----
 
-%Base Case
-score_line(Line, 0) :-
-    length(Line, Len),
-    Len < 4, 
-    format('Too short Line ~w & Len ~w\n', [Line, Len]), !.
-
 %Recursive Case with points
-score_line([A,A,A,A|_Tail], Score):-
-    format('A is ~w\n', [A]),
+score_line([A,A,A,A|Tail], Score):-
     A \= '-',
+    !,
+    %format('A is ~w\n', [A]),
+    %trace,
     write('Find one point\n'),
-    score_line([A,A,A|_Tail], NewScore),
-    format('NewScore ~w & Score ~w\n', [NewScore, Score]),
-    Score is NewScore + 1.
+    score_line([A,A,A|Tail], NewScore),
+    Score is NewScore + 1,
+    format('NewScore ~w & Score ~w\n', [NewScore, Score]).
 
 %Recursive Case without points
-score_line([_|Tail], Score) :-
+score_line([_,B,C,D|Tail], Score) :-
     %write('Nothing here sorry :c\n'),
-    score_line(Tail, Score).
+    score_line([B,C,D|Tail],Score).
+
+%Base Case
+score_line(_Line, 0).
 
 %--------------------------------------------------- 
 

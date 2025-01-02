@@ -92,12 +92,11 @@ info_about_project:-
 %GAME MENU
 
 %Allows configuring the game type (H/H, H/PC, PC/H, or PC/PC), difficulty level(s) to be used and define each user last moves 
-game_menu(GameConfig):-
+game_menu(game_configuration(Mode, board_size(Width, Height), player_info(1, Last_move1, 0, Board1, Level1), player_info(2, Last_move2, 0, Board2, Level2))):-
     welcome,
     game_mode(Mode, Last_move1, Last_move2, Level1, Level2), % Obter o modo de jogo e os movimentos finais dos jogadores
     nl,
-    game_board(Width, Height),         % Obter as dimensões do tabuleiro
-    BoardSize = board_size(Width, Height),
+    game_board(Width, Height),
     
     nl,
     write(' ============================\n'),
@@ -106,15 +105,8 @@ game_menu(GameConfig):-
     nl,
 
     % Geração dos tabuleiros
-    generate_board(Width, Height, Board1), % Cria o tabuleiro para o jogador 1
-    generate_board(Width, Height, Board2), % Cria o tabuleiro para o jogador 2
-    
-    %Criar informações dos jogadores
-    PlayerInfo1  = player_info(1, Last_move1, 0, Board1, Level1),
-    PlayerInfo2  = player_info(2, Last_move2, 0, Board2, Level2),
-
-    %Criar a configuração do jogo
-    GameConfig  = game_configuration(Mode, BoardSize, PlayerInfo1, PlayerInfo2).
+    generate_board(Width, Height, Board1), 
+    generate_board(Width, Height, Board2). 
 
 %--------------------------------------------------
 %--------------------------------------------------
@@ -198,8 +190,7 @@ define_level(Player, Level):-
 
 
 %Get Human Player last moves
-game_human(Player, Last_move, Level):-
-    Level is 0,
+game_human(Player, Last_move, 0):-
     format('\nHey Player ~w', [Player]),    
     nl,
     player_last_moves(Last_move),
@@ -217,10 +208,10 @@ player_last_moves(MoveSymbol) :-
     get_symbol(Move, MoveSymbol).
 
 %Empyt places symbol
-get_symbol(1,MoveSymbol):- MoveSymbol = '*'.
+get_symbol(1,'*').
 
 %Joker places symbol
-get_symbol(2,MoveSymbol):- MoveSymbol = '@'.
+get_symbol(2,'@').
 
 %---------------------------------------------------
 %--------------------------------------------------
@@ -233,10 +224,9 @@ random_index_number(Width, ShuffledNumbers):-
     findall(Number, between(1, Width, Number), List), %create a list of numbers between 1 and Width
     random_permutation(List, ShuffledNumbers). %shuffle this list using random
 
-random_index_letters(Height, ShuffledLetters):-
-    Start is 65, %Código ASCII para 'A'
-    End is Start + Height - 1,
-    findall(Letter, (between(Start, End, Code), char_code(Letter, Code)), List),  %create a list of letters between a and Height
+random_index_letters(Height, ShuffledLetters):- 
+    End is 65 + Height - 1, %Código ASCII para 'A'
+    findall(Letter, (between(65, End, Code), char_code(Letter, Code)), List),  %create a list of letters between a and Height
     random_permutation(List, ShuffledLetters). %shuffle
 
 generate_empty_cells(Width, Height, Cells) :-
@@ -245,11 +235,10 @@ generate_empty_cells(Width, Height, Cells) :-
     length(Cells, Height),       % Cria a lista de linhas
     maplist(=(Row), Cells).      % Preenche cada linha com a mesma estrutura.
 
-generate_board(Width, Height, Board) :-
+generate_board(Width, Height, board(ShuffledNumbers, ShuffledLetters, Cells)) :-
     random_index_number(Width, ShuffledNumbers), nl,
     random_index_letters(Height, ShuffledLetters),
-    generate_empty_cells(Width, Height, Cells),
-    Board = board(ShuffledNumbers, ShuffledLetters, Cells).
+    generate_empty_cells(Width, Height, Cells).
 
 %--------------------------------------------------
 

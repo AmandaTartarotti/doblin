@@ -1,10 +1,9 @@
 %-----------------------------------------------
 
 initial_state(
-    game_configuration(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2), GameState
-):-
-    CurrentPlayer = 1,
-    GameState = game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer).
+    game_configuration(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2), 
+    game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, 1)
+).
 
 %-----------------------------------------------
 
@@ -37,41 +36,21 @@ print_board_rows([Letter|Tail], [CellHead|CellTail], Width) :-
 
 %-----------------------------------------------
 
-%Define_level
+%Define level
 
-%return player1 level
-get_level(game_state(_, _, player_info( _, _, _, _, Level1), _, 1), Level):- Level is Level1.
-
-%return player2 level
-get_level(game_state(_, _, _, player_info( _, _, _, _, Level2), 2), Level):- Level is Level2.
-
-
-%-----------------------------------------------
-
-%Define_player
-
-%O player vai ser humano(1) quando o Mode for 1 | quando o Mode for 2 e o CurrentPlayer for 1 | quando o Mode for 3 e o CurrentPlayer for 2
-%O player vai ser computer(2) quando o Mode for 4 | quando o Mode for 2 e o CurrentPlayer for 2 | quando o Mode for 3 e o CurrentPlayer for 1
-
-%Case H/H
-define_player(game_state(1, _, _, _, _), Player):- Player is 1.
-
-%Case H/PC
-define_player(game_state(2, _, _, _, CurrentPlayer), Player):- Player is CurrentPlayer.
-
-%Case PC/H
-define_player(game_state(3, _, _, _, CurrentPlayer), Player):- Player is 3 - CurrentPlayer.
-
-%Case PC/PC
-define_player(game_state(4, _, _, _, _), Player):- Player is 2.
+%return player level
+get_level(game_state(_, _, player_info( _, _, _, _, Level), _, 1), Level).
+get_level(game_state(_, _, player_info( _, _, _, _, Level), _, 2), Level).
 
 %-----------------------------------------------
 
 %Next Player
 
-next_player(game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer), NewState):-
-    NextPlayer is (3 - CurrentPlayer),
-    NewState = game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, NextPlayer).
+next_player(
+    game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer), 
+    game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, NextPlayer)
+):-
+    NextPlayer is (3 - CurrentPlayer).
 
 %---------------------------------------------------
 

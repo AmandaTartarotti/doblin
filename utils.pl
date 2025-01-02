@@ -33,7 +33,7 @@ moviment(_Move,_Symbol).
 clear_buffer:-
     repeat,
     get_char(C),
-    (C = '\n' ; C == -1),  % Verifica se encontrou um Enter ou final de arquivo
+    C = '\n',
     !.
 
 get_number(Value) :-
