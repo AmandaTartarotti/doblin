@@ -44,7 +44,8 @@ execute_last_moves(game_state(Mode, BoardSize, PlayerInfo1, PlayerInfo2, Current
     place_final_pieces(
         4,
         game_state(Mode, BoardSize, PlayerInfo1, PlayerInfo2, CurrentPlayer), 
-        IntermediateGameState, Level),
+        IntermediateGameState, 
+        Level),
     write('\nPlayer 2, your 4 final pieces are going to be placed in the remain spaces.\n'),
     place_remain_final_pieces(4, IntermediateGameState, FinalGameState),
     display_game(FinalGameState).
@@ -64,7 +65,7 @@ place_final_pieces(
     move(game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1,Level1), PlayerInfo2, CurrentPlayer), moviment(UserMove, Last_move1), NewGameState),
     Remain is N - 1,
     display_game(NewGameState),
-    place_final_pieces(Remain, NewGameState, FinalGameState).
+    place_final_pieces(Remain, NewGameState, FinalGameState,0).
 
 
 %Place the final pieces for player 1 when it is a level 1 or 2 - machine
@@ -225,20 +226,17 @@ update_board_aux([Head|Tail], Index, NewInsert, [Head|NewTail]) :-
 
 %count the total score for a board considering lines (Row and Column), diagonal and squares
 count_score(board(_, _, Cells), Score):- 
-    %lines
-    write('Estou sendo chamado\n'),
-    score_lines(Cells, Score),
-    format('Score: ~w\n', [Score]),
-    format('Cells: ~w\n', [Cells]).
+    %row
+    score_lines(Cells, RowScore),
 
-    %transpose(Cells, Ts),
-    %format('Transpose ~w\n', [Ts]),
-    %score_lines(Ts,ColScore),
+    %col
+    transpose(Cells, Ts),
+    score_lines(Ts,ColScore),
 
     %diagonal
     %squares
 
-    %Score is RowScore + ColScore.
+    Score is RowScore + ColScore.
 
 %---------------------------------------------------  
 
