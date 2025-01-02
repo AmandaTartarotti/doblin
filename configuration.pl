@@ -181,7 +181,7 @@ game_machine(Player, Last_move, Level):-
     format('\nPlayer ~w choose as the last move ~w\n', [Player, Last_move]).
 
 %Generate the machine last moves
-random_last_moves(MoveSymbol) :-
+random_last_moves(MoveSymbol):-
     random_select(Move, [1,2], _Rest),
     get_symbol(Move, MoveSymbol).
 

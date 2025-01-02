@@ -41,21 +41,24 @@ compare_score(_, Winner):-Winner is 2.
 
 execute_last_moves(game_state(Mode, BoardSize, PlayerInfo1, PlayerInfo2, CurrentPlayer), FinalGameState):-
     write('Player 1, you have 4 final pieces to place.\n'),
+    get_level(game_state(Mode, BoardSize, PlayerInfo1, PlayerInfo2, CurrentPlayer), Level),
     place_final_pieces(
         4,
         game_state(Mode, BoardSize, PlayerInfo1, PlayerInfo2, CurrentPlayer), 
-        IntermediateGameState),
-    write('Player 2, your 4 final pieces are going to be placed in the remain spaces.\n'),
+        IntermediateGameState, Level),
+    write('\nPlayer 2, your 4 final pieces are going to be placed in the remain spaces.\n'),
     place_remain_final_pieces(4, IntermediateGameState, FinalGameState),
     display_game(FinalGameState).
 
 %---------------------------------------------------
 
-place_final_pieces(0, GameState, GameState) :- !.
+%Place the final pieces for player 1 when it is a level 0 - human
+place_final_pieces(0, GameState, GameState, 0) :- !.
 place_final_pieces(
     N, 
     game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1, Level1), PlayerInfo2, CurrentPlayer),
-    FinalGameState
+    FinalGameState, 
+    0
 ):-
     N > 0,
     choose_move(game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1,Level1), PlayerInfo2, CurrentPlayer), _, moviment(UserMove, Last_move1)),
@@ -64,6 +67,10 @@ place_final_pieces(
     display_game(NewGameState),
     place_final_pieces(Remain, NewGameState, FinalGameState).
 
+
+%Place the final pieces for player 1 when it is a level 1 or 2 - machine
+place_final_pieces(N, GameState, FinalGameState, _):-
+    place_remain_final_pieces(N, GameState, FinalGameState).
 
 place_remain_final_pieces(0,GameState, GameState) :- !.
 place_remain_final_pieces(

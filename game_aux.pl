@@ -1,15 +1,10 @@
 %-----------------------------------------------
 
-%initial_state(
-%    game_configuration(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2), GameState
-%):-
-    %CurrentPlayer = 1,
-    %GameState = game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer).
-%tirar '='
 initial_state(
-    game_configuration(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2), 
-    game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, 1)
-).
+    game_configuration(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2), GameState
+):-
+    CurrentPlayer = 1,
+    GameState = game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer).
 
 %-----------------------------------------------
 
@@ -26,58 +21,37 @@ display_game(game_state(_, board_size(Width, _), PlayerInfo1, PlayerInfo2, Curre
     print_player_info(PlayerInfo1, Width), nl,
     print_player_info(PlayerInfo2, Width), nl. 
 
-%print_player_info(player_info(Player, _, Score, Board), Width) :-
 print_player_info(player_info(Player, _, Score, Board,_), Width) :-
     format('Player ~w score: ~w\n', [Player, Score]),
-    nl,
     print_player_board(Board, Width).
 
-
-print_player_board(board(Numbers, Letters, Cells), _) :-
+print_player_board(board(Numbers, Letters, Cells), Width) :-
     write('   '), % um espaço adicional so para formatar bonitin c:
-    %format('~w', [Numbers]), nl,  % Print each row
-    print_numbers(Numbers),
-    nl,
-    write('  +'),
-    print_divider(Numbers),
-    nl,
-    % cada linha com a sua letra
-    print_board_rows(Letters, Cells).
+    format('~w', [Numbers]), nl,  % Print each row
+    print_board_rows(Letters, Cells, Width).
 
-% 1º linha com os numeros
-print_numbers([]).
-print_numbers([Num|Tail]) :-
-    format(' ~w  ', [Num]),
-    print_numbers(Tail).
+print_board_rows([], [], _).
+print_board_rows([Letter|Tail], [CellHead|CellTail], Width) :-
+    format('~w  ~w\n', [Letter, CellHead]),
+    print_board_rows(Tail, CellTail, Width).
 
-% divisor horizontal das linhas
-print_divider([]) :-
-    write(' ').
-print_divider([_|Tail]) :-
-    write('---+'),
-    print_divider(Tail).
-
-% todas as linhas 
-print_board_rows([], []).
-print_board_rows([Letter|TailLetters], [Row|TailRows]) :-
-    format('~w |', [Letter]),
-    print_row(Row),
-    nl,
-    write('  +'),
-    print_divider(Row),
-    nl,
-    print_board_rows(TailLetters, TailRows).
-
-% uma só linha
-print_row([]).
-print_row([Cell|Tail]) :-
-    format(' ~w |', [Cell]),
-    print_row(Tail).
 %-----------------------------------------------
+
+%Define_level
+
+%return player1 level
+get_level(game_state(_, _, player_info( _, _, _, _, Level1), _, 1), Level):- Level is Level1.
+
+%return player2 level
+get_level(game_state(_, _, _, player_info( _, _, _, _, Level2), 2), Level):- Level is Level2.
+
+
+%-----------------------------------------------
+
+%Define_player
 
 %O player vai ser humano(1) quando o Mode for 1 | quando o Mode for 2 e o CurrentPlayer for 1 | quando o Mode for 3 e o CurrentPlayer for 2
 %O player vai ser computer(2) quando o Mode for 4 | quando o Mode for 2 e o CurrentPlayer for 2 | quando o Mode for 3 e o CurrentPlayer for 1
-
 
 %Case H/H
 define_player(game_state(1, _, _, _, _), Player):- Player is 1.
@@ -95,15 +69,9 @@ define_player(game_state(4, _, _, _, _), Player):- Player is 2.
 
 %Next Player
 
-%next_player(game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer), NewState):-
-%    NextPlayer is (3 - CurrentPlayer),
-%    NewState = game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, NextPlayer).
-%tirar '='
-next_player(
-    game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer),
-    game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, NextPlayer)
-) :-
-    NextPlayer is 3 - CurrentPlayer.
+next_player(game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer), NewState):-
+    NextPlayer is (3 - CurrentPlayer),
+    NewState = game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, NextPlayer).
 
 %---------------------------------------------------
 
@@ -155,10 +123,10 @@ generate_cells(Width, Height, ListOfCells) :-
 
 % valid_moves(+GameState, -ListOfMoves)
 valid_moves(game_state(_, board_size(Width, Height), PlayerInfo, _, _), ListOfMoves) :-
-    write('Width: '), write(Width), 
-    nl,
-    write('Height: '), write(Height), 
-    nl,
+    %write('Width: '), write(Width), 
+    %nl,
+    %write('Height: '), write(Height), 
+    %nl,
 
     integer(Width), integer(Height),
 
@@ -177,9 +145,9 @@ valid_moves(game_state(_, board_size(Width, Height), PlayerInfo, _, _), ListOfMo
             %write('Valid cell: '), write([RowChar, ColChar]), nl 
         ),
         ListOfMoves
-    ).
-    %write('ListOfMoves: '), write(ListOfMoves), nl. 
+    ),
+    %write('ListOfMoves: '), write(ListOfMoves), 
+    nl. 
 
 %---------------------------------------------------
 %---------------------------------------------------
-
