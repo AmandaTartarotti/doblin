@@ -1,10 +1,15 @@
 %-----------------------------------------------
 
+%initial_state(
+%    game_configuration(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2), GameState
+%):-
+    %CurrentPlayer = 1,
+    %GameState = game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer).
+%tirar '='
 initial_state(
-    game_configuration(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2), GameState
-):-
-    CurrentPlayer = 1,
-    GameState = game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer).
+    game_configuration(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2), 
+    game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, 1)
+).
 
 %-----------------------------------------------
 
@@ -56,9 +61,15 @@ define_player(game_state(4, _, _, _, _), Player):- Player is 2.
 
 %Next Player
 
-next_player(game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer), NewState):-
-    NextPlayer is (3 - CurrentPlayer),
-    NewState = game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, NextPlayer).
+%next_player(game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer), NewState):-
+%    NextPlayer is (3 - CurrentPlayer),
+%    NewState = game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, NextPlayer).
+%tirar '='
+next_player(
+    game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer),
+    game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, NextPlayer)
+) :-
+    NextPlayer is 3 - CurrentPlayer.
 
 %---------------------------------------------------
 
@@ -110,8 +121,8 @@ generate_cells(Width, Height, ListOfCells) :-
     findall(
         [RowChar, ColChar],
         (
-            between(1, Height, Row),                
-            between(1, Width, Col), 
+            between(1, Width, Row),
+            between(1, Height, Col),
 
             RowCode is Row + 48,                     
             ColCode is Col + 64, 
@@ -141,9 +152,10 @@ valid_moves(game_state(_, board_size(Width, Height), PlayerInfo, _, _), ListOfMo
         [RowChar, ColChar],
         (
             member([RowChar, ColChar], AllCells), % itera pelas cells
-            write('Checking cell: '), write([RowChar, ColChar]), nl, 
-            validate_move(moviment([RowChar, ColChar], _), board_size(Width, Height), PlayerInfo),
-            write('Valid cell: '), write([RowChar, ColChar]), nl 
+            %write('Checking cell: '), write([RowChar, ColChar]), nl,
+            validate_move(moviment([RowChar, ColChar], _), board_size(Width, Height), PlayerInfo)
+            %validate_move(moviment([RowChar, ColChar], _), board_size(Width, Height), PlayerInfo),
+            %write('Valid cell: '), write([RowChar, ColChar]), nl 
         ),
         ListOfMoves
     ),

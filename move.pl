@@ -127,7 +127,7 @@ move(GameState, moviment(_,Symbol), NewState):-
 
 %validate_move(moviment([RowChar, ColChar], _), board_size(Width, Height), player_info(_, _, _, Board)):-
 validate_move(moviment([RowChar, ColChar], _), board_size(Width, Height), player_info(_, _, _, Board, _)):-
-    write('Validating move: '), write([RowChar, ColChar]), nl,
+    write('Validating move: '), write([RowChar, ColChar]),
     length([RowChar, ColChar], 2),
     %write('Lenght Valid\n'),
 
@@ -172,7 +172,7 @@ find_cellcode(RowNumber, ColChar, board(ShuffledNumbers, ShuffledLetters, Cells)
     %format('The character code is: ~w~n', [CellCode]).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
 
 validate_free_space(45):- 
-    write('\nFree Space, Move Valid!\n').
+    write('\nFree Space, Move Valid!\n'), nl.
 
 %---------------------------------------------------
 
