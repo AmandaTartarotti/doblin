@@ -29,18 +29,50 @@ display_game(game_state(_, board_size(Width, _), PlayerInfo1, PlayerInfo2, Curre
 %print_player_info(player_info(Player, _, Score, Board), Width) :-
 print_player_info(player_info(Player, _, Score, Board,_), Width) :-
     format('Player ~w score: ~w\n', [Player, Score]),
+    nl,
     print_player_board(Board, Width).
 
-print_player_board(board(Numbers, Letters, Cells), Width) :-
+
+print_player_board(board(Numbers, Letters, Cells), _) :-
     write('   '), % um espaço adicional so para formatar bonitin c:
-    format('~w', [Numbers]), nl,  % Print each row
-    print_board_rows(Letters, Cells, Width).
+    %format('~w', [Numbers]), nl,  % Print each row
+    print_numbers(Numbers),
+    nl,
+    write('  +'),
+    print_divider(Numbers),
+    nl,
+    % cada linha com a sua letra
+    print_board_rows(Letters, Cells).
 
-print_board_rows([], [], _).
-print_board_rows([Letter|Tail], [CellHead|CellTail], Width) :-
-    format('~w  ~w\n', [Letter, CellHead]),
-    print_board_rows(Tail, CellTail, Width).
+% 1º linha com os numeros
+print_numbers([]).
+print_numbers([Num|Tail]) :-
+    format(' ~w  ', [Num]),
+    print_numbers(Tail).
 
+% divisor horizontal das linhas
+print_divider([]) :-
+    write(' ').
+print_divider([_|Tail]) :-
+    write('---+'),
+    print_divider(Tail).
+
+% todas as linhas 
+print_board_rows([], []).
+print_board_rows([Letter|TailLetters], [Row|TailRows]) :-
+    format('~w |', [Letter]),
+    print_row(Row),
+    nl,
+    write('  +'),
+    print_divider(Row),
+    nl,
+    print_board_rows(TailLetters, TailRows).
+
+% uma só linha
+print_row([]).
+print_row([Cell|Tail]) :-
+    format(' ~w |', [Cell]),
+    print_row(Tail).
 %-----------------------------------------------
 
 %O player vai ser humano(1) quando o Mode for 1 | quando o Mode for 2 e o CurrentPlayer for 1 | quando o Mode for 3 e o CurrentPlayer for 2
