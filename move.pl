@@ -263,13 +263,13 @@ sum_score(LineScore, RestScore, TotalScore):-
 %---Auxiliar Flow----
 
 %Recursive Case with points
-score_line([A,A,A,A|Tail], Score):-
-    A \= '-',
+score_line([A,B,C,D|Tail], Score):-
+    valid_sequence([A,B,C,D]),
     !,
     %format('A is ~w\n', [A]),
     %trace,
     write('Find one point\n'),
-    score_line([A,A,A|Tail], NewScore),
+    score_line([B,C,D|Tail], NewScore),
     Score is NewScore + 1,
     format('NewScore ~w & Score ~w\n', [NewScore, Score]).
 
@@ -280,6 +280,25 @@ score_line([_,B,C,D|Tail], Score) :-
 
 %Base Case
 score_line(_Line, 0).
+
+%---Validate Flow----
+
+%The approach here is to remove all joker symbols and check if the remain ones are all equal 
+
+valid_sequence([A,B,C,D]):-
+    remove_jokers([A,B,C,D], Cleaned),
+    equal_sequence(Cleaned).
+
+remove_jokers([], []).
+remove_jokers(['@'|T], Rest):-
+    remove_jokers(T, Rest).
+remove_jokers([H|T], [H|Rest]):-
+    H \= '@', 
+    remove_jokers(T, Rest).
+
+equal_sequence([]).
+equal_sequence(Cleaned):-
+    sort(Cleaned, [_]).
 
 %--------------------------------------------------- 
 
