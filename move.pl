@@ -250,9 +250,10 @@ count_score(Width, Height, board(_, _, Cells), Score):-
     score_diagonals(Width, Height, Cells, DiagonalScore, 4),
 
     %squares
+    score_square(Width, Height, Cells, SquareScore),
 
-    %format('\nRowScore ~w, ColScore ~w, DiagonalScore ~w\n', [RowScore, ColScore, DiagonalScore]),
-    Score is RowScore + ColScore + DiagonalScore.
+    %format('\nRowScore ~w, ColScore ~w, DiagonalScore ~w, SquareScore ~w\n', [RowScore, ColScore, DiagonalScore,SquareScore]),
+    Score is RowScore + ColScore + DiagonalScore + SquareScore.
 
 %---------------------------------------------------  
 
@@ -388,5 +389,27 @@ list_diag2(Ess,Ds) :-
 %--------------------------------------------------- 
 
 %SQUARE CASE
+
+% score_square(+Width, +Height, +Cells, -SquareScore)
+score_square(Width, Height, Cells, SquareScore) :-
+    findall(1,  (between(1, Height, X), 
+         between(1, Width, Y), 
+         valid_square(Cells, Width, Height, X, Y)), Squares),
+    length(Squares, SquareScore).
+
+% valid_square(+Cells, +Width, +Height, +X, +Y)
+% Verifica se as coordenadas (X, Y), (X, Y+1), (X+1, Y), (X+1, Y+1) formam um quadrado válido.
+valid_square(Cells, Width, Height, X, Y) :-
+    X1 is X + 1,
+    Y1 is Y + 1,
+    board_limits(X1, Y1, Width, Height),
+    nth1(X, Cells, Row1),
+    nth1(X1, Cells, Row2),
+    nth1(Y, Row1, A),
+    nth1(Y1, Row1, B),
+    nth1(Y, Row2, C),
+    nth1(Y1, Row2, D),
+    valid_sequence([A, B, C, D]).
+
     
 %---------------------------------------------------   
