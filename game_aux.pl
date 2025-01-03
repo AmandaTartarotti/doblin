@@ -18,7 +18,7 @@ display_game(game_state(_, board_size(Width, _), PlayerInfo1, PlayerInfo2, Curre
 
     %evaluate_game_state(game_state(_, _, PlayerInfo1, PlayerInfo2, CurrentPlayer), Value1, Value2),
     %format('Player 1 Value: ~w\nPlayer 2 Value: ~w\n', [Value1, Value2]),
-    evaluate_game_state(game_state(_, _, PlayerInfo1, PlayerInfo2, CurrentPlayer), Perc1, Perc2),
+    evaluate_game_state(game_state(_, _, PlayerInfo1, PlayerInfo2, CurrentPlayer), _Perc1, _Perc2),
     %format('Player 1 Perc1: ~w\nPlayer 2 Perc2: ~w\n', [Perc1, Perc2]),
 
     %Imprimir informações dos jogadores
@@ -129,7 +129,7 @@ handle_percentages(Value1, Value2, TotalValue, Perc1, Perc2) :-
 
 
 %value(game_state(_, _, _, player_info(_, _, OpponentScore2, OpponentBoard2,_), _), 1, Value1) :-
-value(game_state(_, _, _, player_info(Player2, _, OpponentScore2, OpponentBoard2,_), _), 1, Value1) :-
+value(game_state(_, _, _, player_info(_Player2, _, OpponentScore2, OpponentBoard2,_), _), 1, Value1) :-
     %format('OpponentScore2: ~w\n', [OpponentScore2]),
     %format('Player2 score: ~w\n', [OpponentScore2]),
     %write('ENTREI NO VALUE1 '), nl,

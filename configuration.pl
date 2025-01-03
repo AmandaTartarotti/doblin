@@ -141,23 +141,25 @@ handle_mode(4, Last_move1, Last_move2, Level1, Level2):-
     game_machine(2, Last_move2, Level2).
 
 %Handle Mode View Game Rules 
-handle_mode(5, Last_move1, Last_move2, Level1, Level2):- 
+handle_mode(5, _Last_move1, _Last_move2, _Level1, _Level2):- 
     game_rules, %fazer que ao clicar em [E] voltar para o menu
     repeat,
     get_char(Char),
     member(Char,['E','e']),
     %( Char = 'E' ; Char = 'e' ), 
     !, % Sai do repeat após uma entrada válida
+    clear_buffer,
     play_game.
 
 %Handle Mode View info About Project
-handle_mode(6, Last_move1, Last_move2, Level1, Level2):- 
+handle_mode(6, _Last_move1, _Last_move2, _Level1, _Level2):- 
     info_about_project,
     repeat,
     get_char(Char),
     member(Char,['E','e']),
     %( Char = 'E' ; Char = 'e' ), 
     !, % Sai do repeat após uma entrada válida
+    clear_buffer,
     play_game.
 
 %Handle Exceptions
