@@ -46,6 +46,7 @@ execute_last_moves(game_state(Mode, BoardSize, PlayerInfo1, PlayerInfo2, Current
         game_state(Mode, BoardSize, PlayerInfo1, PlayerInfo2, CurrentPlayer), 
         IntermediateGameState, 
         Level),
+    display_game(IntermediateGameState),
     write('\nPlayer 2, your 4 final pieces are going to be placed in the remain spaces.\n'),
     place_remain_final_pieces(4, IntermediateGameState, FinalGameState),
     display_game(FinalGameState).
@@ -65,12 +66,24 @@ place_final_pieces(
     move(game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1,Level1), PlayerInfo2, CurrentPlayer), moviment(UserMove, Last_move1), NewGameState),
     Remain is N - 1,
     display_game(NewGameState),
-    place_final_pieces(Remain, NewGameState, FinalGameState,0).
+    place_final_pieces(Remain, NewGameState, FinalGameState, 0).
 
 
 %Place the final pieces for player 1 when it is a level 1 or 2 - machine
-place_final_pieces(N, GameState, FinalGameState, _):-
-    place_remain_final_pieces(N, GameState, FinalGameState).
+place_final_pieces(0, GameState, GameState, _Level) :- !.
+place_final_pieces(    
+    N, 
+    game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1, Level1), PlayerInfo2, CurrentPlayer),
+    FinalGameState, 
+    Level
+):-
+    N > 0,
+    valid_moves(game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1, Level1), PlayerInfo2, CurrentPlayer), ValidMoves),
+    random_select(RandomMove, ValidMoves, _Rest),
+    format('RandomMove ~w', [RandomMove]),
+    move(game_state(Mode, BoardSize, player_info(Id1, Last_move1, Score1, Board1, Level1), PlayerInfo2, CurrentPlayer),  moviment(RandomMove, Last_move1), NewGameState),
+    Remain is N - 1,
+    place_final_pieces(Remain, NewGameState, FinalGameState, Level).
 
 place_remain_final_pieces(0,GameState, GameState) :- !.
 place_remain_final_pieces(
@@ -114,7 +127,7 @@ move(
 ):-
     validate_move(moviment(Move,_), board_size(Width, Height), PlayerInfo1), %passa um PlayerInfo qualquer para validar se é uma posição valida no board
     !, 
-    execute_move(moviment(Move,Symbol), PlayerInfo1, PlayerInfo2, UpdateInfo1, UpdateInfo2).
+    execute_move(Width, Height, moviment(Move,Symbol), PlayerInfo1, PlayerInfo2, UpdateInfo1, UpdateInfo2).
 
 move(GameState, moviment(_,Symbol), NewState):-
     write('\nInvalid move.\nEnter exactly two characters and make sure it is a free space on the board!\n'),
@@ -180,14 +193,14 @@ validate_free_space(45).
 
 %execute move - update the users board and score
 
-execute_move(moviment(Move,Symbol), player_info(_, Last_move1, _, Board1, Level1), player_info(_, Last_move2, _, Board2, Level2), player_info(1, Last_move1, NewScore1, NewBoard1, Level1), player_info(2, Last_move2, NewScore2, NewBoard2, Level2)):-
+execute_move(Width, Height, moviment(Move,Symbol), player_info(_, Last_move1, _, Board1, Level1), player_info(_, Last_move2, _, Board2, Level2), player_info(1, Last_move1, NewScore1, NewBoard1, Level1), player_info(2, Last_move2, NewScore2, NewBoard2, Level2)):-
 
     update_board(moviment(Move,Symbol),Board1, NewBoard1),
     update_board(moviment(Move,Symbol),Board2, NewBoard2),
 
-    count_score(NewBoard1, NewScore1),
-    write('Moving to the other player score\n'),
-    count_score(NewBoard2, NewScore2).
+    count_score(Width, Height, NewBoard1, NewScore1),
+    %write('Moving to the other player score\n'),
+    count_score(Width, Height, NewBoard2, NewScore2).
 
 %---------------------------------------------------  
 
@@ -225,7 +238,7 @@ update_board_aux([Head|Tail], Index, NewInsert, [Head|NewTail]) :-
 %---------------------------------------------------
 
 %count the total score for a board considering lines (Row and Column), diagonal and squares
-count_score(board(_, _, Cells), Score):- 
+count_score(Width, Height, board(_, _, Cells), Score):- 
     %row
     score_lines(Cells, RowScore),
 
@@ -234,9 +247,12 @@ count_score(board(_, _, Cells), Score):-
     score_lines(Ts,ColScore),
 
     %diagonal
+    score_diagonals(Width, Height, Cells, DiagonalScore, 4),
+
     %squares
 
-    Score is RowScore + ColScore.
+    %format('\nRowScore ~w, ColScore ~w, DiagonalScore ~w\n', [RowScore, ColScore, DiagonalScore]),
+    Score is RowScore + ColScore + DiagonalScore.
 
 %---------------------------------------------------  
 
@@ -245,20 +261,16 @@ count_score(board(_, _, Cells), Score):-
 %---Main Flow---
 
 %Base Case
-score_lines([], 0):- write('Finaly here\n').
+score_lines([], 0).
 
 %Recursive Case
 score_lines([Line | Rest], TotalScore) :-
-    %format('Line ~w and Rest ~w\n', [Line, Rest]),
     score_line(Line, LineScore),
-    %format('Line Score: ~w\n', [LineScore]),
     score_lines(Rest, RestScore),
-    %format('LineScore ~w & RestScore ~w\n', [LineScore,RestScore]),
     sum_score(LineScore, RestScore, TotalScore).
 
 sum_score(LineScore, RestScore, TotalScore):-
     TotalScore is LineScore + RestScore.
-    %format('LineScore ~w & RestScore ~w & TotalScore ~w\n', [LineScore,RestScore,TotalScore]).
 
 %---Auxiliar Flow----
 
@@ -266,16 +278,11 @@ sum_score(LineScore, RestScore, TotalScore):-
 score_line([A,B,C,D|Tail], Score):-
     valid_sequence([A,B,C,D]),
     !,
-    %format('A is ~w\n', [A]),
-    %trace,
-    write('Find one point\n'),
     score_line([B,C,D|Tail], NewScore),
-    Score is NewScore + 1,
-    format('NewScore ~w & Score ~w\n', [NewScore, Score]).
+    Score is NewScore + 1.
 
 %Recursive Case without points
 score_line([_,B,C,D|Tail], Score) :-
-    %write('Nothing here sorry :c\n'),
     score_line([B,C,D|Tail],Score).
 
 %Base Case
@@ -302,7 +309,70 @@ equal_sequence(Cleaned):-
 
 %--------------------------------------------------- 
 
-%DIAGONAL CASE -- under implementation
+%DIAGONAL CASE 
+
+score_diagonals(Width, Height, Cells, TotalScore, N) :-
+    findall(Diagonal, diagonal(Width, Height, Cells, Diagonal, N), Diagonals),
+    %format('Diagonals ~w\n', [Diagonals]),
+    score_lines(Diagonals, TotalScore).
+
+%Busca uma diagonal válida
+
+%Começa de cada linha na primeira coluna
+diagonal(Width, Height, Cells, Diagonal, N) :-
+    between(1, Height, StartRow), 
+    extract_diagonal(Cells, StartRow, 1, 1, 1, Diagonal, Width, Height),
+    length(Diagonal, Len), Len >= N.
+    %format('Diagonal1 ~w\n', [Diagonal]).
+
+% Começa de cada linha na última coluna
+diagonal(Width, Height, Cells, Diagonal, N) :-
+    between(2, Height, StartRow),
+    extract_diagonal(Cells, StartRow, Width, 1, -1, Diagonal,Width, Height),
+    length(Diagonal, Len), Len >= N.
+    %format('Diagonal2 ~w\n', [Diagonal]).
+
+%Começa de cada coluna na primeira linha
+diagonal(Width, Height, Cells, Diagonal, N) :-
+    % Começa de cada coluna na primeira linha
+    between(2, Width, StartCol),
+    extract_diagonal(Cells, 1, StartCol, 1, 1, Diagonal,Width, Height),
+    length(Diagonal, Len), Len >= N.
+    %format('Diagonal3 ~w\n', [Diagonal]).
+
+%Começa de cada coluna na última linha
+diagonal(Width, Height, Cells, Diagonal, N) :-
+    between(1, Width, StartCol),
+    %trace,
+    extract_diagonal(Cells, 1, StartCol, 1, -1, Diagonal,Width, Height),
+    length(Diagonal, Len), Len >= N.
+
+%Se passar dos limites, nao é valido.
+extract_diagonal(_, X, Y, _, _, [], Width, Height) :-
+    \+ board_limits(X, Y, Width, Height),!.
+
+%Extrai uma diagonal a partir de uma posição (X, Y) com direção (DX, DY)
+extract_diagonal(Cells, X, Y, DX, DY, [Elem | Rest], Width, Height) :-
+    %write('\n NN Falhei\n'),
+    get_cell(Cells, X, Y, Elem),
+    NX is X + DX,
+    NY is Y + DY,
+    extract_diagonal(Cells, NX, NY, DX, DY, Rest, Width, Height).
+
+%Limites do tabuleiro
+board_limits(X, Y, Width, Height) :-
+    X >= 1,
+    Y >= 1,
+    X =< Height,
+    Y =< Width.
+
+% Obtém o elemento na célula (X, Y)
+get_cell(Cells, X, Y, Elem) :-
+    nth1(X, Cells, Row),
+    nth1(Y, Row, Elem).
+
+
+%--------------------------------------------------- 
 
 list_diag1([], []).
 list_diag1([[E|_]|Ess], [E|Ds]) :-
