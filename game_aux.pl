@@ -125,9 +125,8 @@ handle_percentages(Value1, Value2, TotalValue, Perc1, Perc2) :-
 %value do Player1
 
 %FALTA 
-%1- calcular nao só
 %2- Diagonais, verticais, quadrados
-%3- COLOCAR EM PERCENTAGEM OS VALUES
+
 
 %value(game_state(_, _, _, player_info(_, _, OpponentScore2, OpponentBoard2,_), _), 1, Value1) :-
 value(game_state(_, _, _, player_info(Player2, _, OpponentScore2, OpponentBoard2,_), _), 1, Value1) :-
@@ -174,25 +173,37 @@ potential_lines([Line | Rest], Total) :-
 % potential_line(+Line, -Count)
 potential_line([], 0).
 
+% caso 5
+potential_line([-, A, A, A, - | Rest], 2) :-
+    A \= '-', 
+    !,
+    potential_line(Rest, 0). 
+
 % caso 1
-potential_line([A, A, A, '-' | Rest], 1) :- % 3 matching elements followed by an empty space
-    A \= '-',                                % Not empty
+potential_line([A, A, A, '-' | Rest], 1) :- 
+    A \= '-',                                
     potential_line(Rest, 0).
 
 % caso 2
-potential_line(['-', A, A, A | Rest], 1) :- % Empty space followed by 3 matching elements
+potential_line(['-', A, A, A | Rest], 1) :-
     A \= '-',                               
     potential_line(Rest, 0).
 
-%potential_line([A, A, '-', A | Rest], 1) :-
-%    A \= '-',
-%    !,
-%    potential_line(Rest, 0).
+% caso 3
+potential_line([A, A, '-', A | Rest], 1) :-
+    A \= '-',
+    potential_line(Rest, 0).
 
+% caso 4
+potential_line([A,'-', A, A | Rest], 1) :-
+    A \= '-',
+    potential_line(Rest, 0).
 
 potential_line([_ | Rest], Count) :-
     potential_line(Rest, Count).
-
+%tava a pensar se faria sentido no caso: -xxx nao passar xxx todo
+%mas por agora vou deixar passar
+%por isso tmb meti o caso de verificar -xxx- logo no inicio de todos
 %---------------------------------------------------
 %---------------------------------------------------
 
