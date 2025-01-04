@@ -14,13 +14,12 @@ display_game(game_state(_, board_size(Width, _), PlayerInfo1, PlayerInfo2, Curre
     format('      Current Player: ~w\n', [CurrentPlayer]),
     write(' ***************************\n'),
 
-    nl, write('Game Boards:\n'), nl,
-
     %evaluate_game_state(game_state(_, _, PlayerInfo1, PlayerInfo2, CurrentPlayer), Value1, Value2),
     %format('Player 1 Value: ~w\nPlayer 2 Value: ~w\n', [Value1, Value2]),
     evaluate_game_state(game_state(_, _, PlayerInfo1, PlayerInfo2, CurrentPlayer), _Perc1, _Perc2),
     %format('Player 1 Perc1: ~w\nPlayer 2 Perc2: ~w\n', [Perc1, Perc2]),
 
+    nl, write('Game Boards:\n'), nl,
     %Imprimir informações dos jogadores
     print_player_info(PlayerInfo1, Width), nl,
     print_player_info(PlayerInfo2, Width), nl.
@@ -123,23 +122,23 @@ game_over(_,_):-
 % value for Player 1 and Player 2
 %evaluate_game_state(GameState, Value1, Value2) :-
 evaluate_game_state(game_state(_, _, PlayerInfo1, PlayerInfo2, CurrentPlayer), Perc1, Perc2):-
-    write('----------- Calculating Value for Player 1 -----------'), nl,
+    %write('----------- Calculating Value for Player 1 -----------'), nl,
     value(game_state(_, _, PlayerInfo1, PlayerInfo2, CurrentPlayer), 1, Value1),  % calculate value for Player1
-    format('Player 1 Value: ~w\n', [Value1]), nl,
+    %format('Player 1 Value: ~w\n', [Value1]), nl,
 
-    write('----------- Calculating Value for Player 2 -----------'), nl,
+    %write('----------- Calculating Value for Player 2 -----------'), nl,
     value(game_state(_, _, PlayerInfo1, PlayerInfo2, CurrentPlayer), 2, Value2), % calculate value for Player2
-    format('Player 2 Value: ~w\n', [Value2]), nl,
-    format('Value1: ~w Value2: ~w\n', [Value1, Value2]),nl,
+    %format('Player 2 Value: ~w\n', [Value2]), nl,
+    %format('Value1: ~w Value2: ~w\n', [Value1, Value2]),nl,
 
     TotalValue is Value1 + Value2,
     handle_percentages(Value1, Value2, TotalValue, Perc1, Perc2).
 
-handle_percentages(_, _, 0.0, 0, 0) :- % se TotalValue é zero, a percentagem fica a 0
-    write('-------------------------------------------------'),nl,
-    write('Player 1 Percentage em ganhar: 0%\n'),
-    write('Player 2 Percentage em ganhar: 0%\n'), 
-    write('-------------------------------------------------'),nl,nl.
+handle_percentages(_, _, 0, 0, 0) :- % se TotalValue é zero, a percentagem fica a 0
+    write('---------------------------------------'),nl,
+    write('Player 1 advantage percentage: 0%\n'),
+    write('Player 2 advantage percentage: 0%\n'), 
+    write('---------------------------------------'),nl,nl.
 
 handle_percentages(Value1, Value2, TotalValue, Perc1, Perc2) :-
     %Perc1 is (Value1 / TotalValue) * 100,
@@ -149,8 +148,8 @@ handle_percentages(Value1, Value2, TotalValue, Perc1, Perc2) :-
     Perc1 is round((Value1 / TotalValue) * 100),
     Perc2 is round((Value2 / TotalValue) * 100),
     write('-------------------------------------------------'),nl,
-    format('Player 1 Percentage em ganhar: ~w%\n', [Perc1]),
-    format('Player 2 Percentage em ganhar: ~w%\n', [Perc2]) ,
+    format('Player 1 advantage percentage: ~w%\n', [Perc1]),
+    format('Player 2 advantage percentage: ~w%\n', [Perc2]) ,
     write('-------------------------------------------------'),nl,nl.
 
     %Perc1 is (Value1 / TotalValue) * 100,
@@ -168,27 +167,29 @@ handle_percentages(Value1, Value2, TotalValue, Perc1, Perc2) :-
 
 
 %value(game_state(_, _, _, player_info(_, _, OpponentScore2, OpponentBoard2,_), _), 1, Value1) :-
-value(game_state(_, _, _, player_info(_Player2, _, OpponentScore2, OpponentBoard2,_), _), 1, Value1) :-
+value(game_state(_, _, _, player_info(_Player2, _, OpponentScore2, _OpponentBoard2,_), _), 1, Value1) :-
     %format('OpponentScore2: ~w\n', [OpponentScore2]),
     %format('Player2 score: ~w\n', [OpponentScore2]),
     %write('ENTREI NO VALUE1 '), nl,
     % combinações possíveis (linhas com 3 elementos consecutivos ou quadrado quase completo com uma elemento em falta)
-    count_possible_combinations(OpponentBoard2, PotentialCombinations),
+    %count_possible_combinations(OpponentBoard2, PotentialCombinations),
     %write('SAI DO count_possible_combinations '),nl,
-    format('OpponentScore2: ~w, PotentialCombinations: ~w\n', [OpponentScore2, PotentialCombinations]),
+    %format('OpponentScore2: ~w, PotentialCombinations: ~w\n', [OpponentScore2, PotentialCombinations]),
     % calculo do value
-    Value1 is OpponentScore2 + 0.5 * PotentialCombinations.
+    Value1 is OpponentScore2. %+ 0.5 * PotentialCombinations.
 
 %value do Player2
-value(game_state(_, _, player_info(_, _, OpponentScore1, OpponentBoard1,_), _, _), 2, Value2) :-
+value(game_state(_, _, player_info(_, _, OpponentScore1, _OpponentBoard1,_), _, _), 2, Value2) :-
     %format('Player1 score: ~w\n', [OpponentScore1]),
     %write('ENTREI NO VALUE2: '),nl,
     % combinações possíveis (linhas com 3 elementos consecutivos ou quadrado quase completo com uma elemento em falta)
-    count_possible_combinations(OpponentBoard1, PotentialCombinations),
-    format('OpponentScore1: ~w, PotentialCombinations: ~w\n', [OpponentScore1, PotentialCombinations]),
+    %count_possible_combinations(OpponentBoard1, PotentialCombinations),
+    %format('OpponentScore1: ~w, PotentialCombinations: ~w\n', [OpponentScore1, PotentialCombinations]),
     % calculo do value
-    Value2 is OpponentScore1 + 0.5 * PotentialCombinations.
+    Value2 is OpponentScore1. %+ 0.5 * PotentialCombinations.
 
+
+%------------------------------
 % find_possible_combinations(+Board, -Count)
 count_possible_combinations(board(_, _, Cells), Count) :-
     % Count potential rows
@@ -259,7 +260,7 @@ potential_line([-, A, A, A, A, A, A, - | Rest], 2) :-
     %!,
     write('-> Contado padrão -AAAAAA-: +2 pontos\n'),
     potential_line(Rest, 0). 
-xxx_xxx
+
 
 % caso com points nos dois lados, tamanho 7
 potential_line([-, A, A, A, A, A, - | Rest], 2) :-

@@ -46,7 +46,7 @@ choose_machine_move(1, _GameState, ValidMoves, Move):-
     random_select(Move, ValidMoves, _Rest),
     format('\nSelected Move ~w\n', [Move]).
 
-choose_move(2, _GameState, _ValidMoves, _Move):-
+choose_machine_move(2, _GameState, _ValidMoves, _Move):-
     write('Under implementation').
     %setof(Value-Mv, NewState^( member(Mv, Moves),
     %move(GameState, Mv, NewState),
