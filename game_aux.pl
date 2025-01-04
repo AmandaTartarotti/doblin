@@ -27,17 +27,56 @@ display_game(game_state(_, board_size(Width, _), PlayerInfo1, PlayerInfo2, Curre
    
 print_player_info(player_info(Player, _, Score, Board,_), Width) :-
     format('Player ~w score: ~w\n', [Player, Score]),
+    nl,
     print_player_board(Board, Width).
 
-print_player_board(board(Numbers, Letters, Cells), Width) :-
-    write('   '), % um espaço adicional so para formatar bonitin c:
-    format('~w', [Numbers]), nl,  % Print each row
-    print_board_rows(Letters, Cells, Width).
+%print_player_board(board(Numbers, Letters, Cells), Width) :-
+%    write('   '), % um espaço adicional so para formatar bonitin c:
+%    format('~w', [Numbers]), nl,  % Print each row
+%    print_board_rows(Letters, Cells, Width).
 
-print_board_rows([], [], _).
-print_board_rows([Letter|Tail], [CellHead|CellTail], Width) :-
-    format('~w  ~w\n', [Letter, CellHead]),
-    print_board_rows(Tail, CellTail, Width).
+%print_board_rows([], [], _).
+%print_board_rows([Letter|Tail], [CellHead|CellTail], Width) :-
+%    format('~w  ~w\n', [Letter, CellHead]),
+%    print_board_rows(Tail, CellTail, Width).
+
+print_player_board(board(Numbers, Letters, Cells), _) :-
+    write('   '), % um espaço adicional so para formatar bonitin c:
+    %format('~w', [Numbers]), nl,  % Print each row
+    print_numbers(Numbers),
+    nl,
+    write('  +'),
+    print_divider(Numbers),
+    nl,
+    % cada linha com a sua letra
+    print_board_rows(Letters, Cells).
+% 1º linha com os numeros
+print_numbers([]).
+print_numbers([Num|Tail]) :-
+    format(' ~w  ', [Num]),
+    print_numbers(Tail).
+% divisor horizontal das linhas
+print_divider([]) :-
+    write(' ').
+print_divider([_|Tail]) :-
+    write('---+'),
+    print_divider(Tail).
+% todas as linhas 
+print_board_rows([], []).
+print_board_rows([Letter|TailLetters], [Row|TailRows]) :-
+    format('~w |', [Letter]),
+    print_row(Row),
+    nl,
+    write('  +'),
+    print_divider(Row),
+    nl,
+    print_board_rows(TailLetters, TailRows).
+
+% uma só linha
+print_row([]).
+print_row([Cell|Tail]) :-
+    format(' ~w |', [Cell]),
+    print_row(Tail).
 
 %-----------------------------------------------
 
@@ -154,15 +193,35 @@ value(game_state(_, _, player_info(_, _, OpponentScore1, OpponentBoard1,_), _, _
 count_possible_combinations(board(_, _, Cells), Count) :-
     % Count potential rows
     %write('ENTREI NO count_possible_combinations: '),nl,
+
+    %linhas
     potential_lines(Cells, RowCount),
     %write('SAI DO potential_lines: '),nl,
     format('Potential horizontal lines: ~w\nResulting RowCount: ~w\n', [Cells, RowCount]), nl,
+
+    %colunas
+    transpose(Cells, Ts),
+    potential_lines(Ts,ColCount),
+    format('Potential vertical lines: ~w\nResulting ColCount: ~w\n', [Cells, ColCount]), nl,
     
-    % falta verticias diagonais e quadrado
-    Count is RowCount.
+    % potential diagonals
+    %potential_diagonals(Board, DiagonalCount),
+
+    % potential squares
+    %potential_squares(Board, SquareCount),
+
+
+    %Count is RowCount + ColCount + DiagonalCount + SquareCount.
+    %Count is DiagonalCount + SquareCount.
+    %Count is SquareCount.
+
+    
+    Count is RowCount + ColCount.
+    %Count is RowCount.
+    %Count is ColCount.
 
 %---------------------------------------------
-
+%pensei em fazer doutra forma onde nao retira totalmente o conjunto que ja foi contado, mas iria contar repetido, por exemplo xxx_xxx iria contar como 2
 % potential_lines(+Board, -Count)
 potential_lines([], 0).
 potential_lines([Line | Rest], Total) :-
@@ -172,34 +231,91 @@ potential_lines([Line | Rest], Total) :-
 
 % potential_line(+Line, -Count)
 potential_line([], 0).
+%potential_line([], 0) :-
+%    write('-> Linha vazia, retornando 0.\n').
 
-% caso 5
-potential_line([-, A, A, A, - | Rest], 2) :-
+%estes foram casos mais especificos, onde há sobreposição e preciso de ter em conta o conjunto já contado anteoriormente, mas a sobrpeosição é de 1 ou 2 elementos
+% x_xx_x resultado de sobreposição de 2 elem x_xx e xx_x
+potential_line([A, -, A, A, -, A| Rest], 2) :-
+    %write('-> Detectado padrão x_xx_x\n'),
     A \= '-', 
-    !,
+    %!, %CUT VERDE, os cuts que meti foram para nao tar a ver mais o resto da linha visto que nestes casos iriam sobrar apenas 3 elem no max o que nao iria ser possivel haver combinações possíveis
+    write('-> Contado padrão x_xx_x: +2 pontos\n'),
+    potential_line(Rest, 0). 
+% xx_x_xx resultado de sobreposição de 1 elem xx_x e x_xx
+potential_line([A, A, -, A, -, A, A| Rest], 2) :-
+    %write('-> Detectado padrão xx_x_xx\n'),
+    A \= '-', 
+    %!,
+    write('-> Contado padrão xx_x_xx: +2 pontos\n'),
     potential_line(Rest, 0). 
 
+%primeiro convem checkar os casos maiores e com possiveis combinações dos dois lados 
+% caso com points nos dois lados, tamanho 8
+%estes caso funcionava sem este pois nao há sobreposição, podem ser contados separadamente
+potential_line([-, A, A, A, A, A, A, - | Rest], 2) :-
+    %write('-> Detectado padrão -AAAAAA-\n'),
+    A \= '-', 
+    %!,
+    write('-> Contado padrão -AAAAAA-: +2 pontos\n'),
+    potential_line(Rest, 0). 
+xxx_xxx
+
+% caso com points nos dois lados, tamanho 7
+potential_line([-, A, A, A, A, A, - | Rest], 2) :-
+    %write('-> Detectado padrão -AAAAA-\n'),
+    A \= '-', 
+    %!,
+    write('-> Contado padrão -AAAAA-: +2 pontos\n'),
+    potential_line(Rest, 0). 
+
+% caso com points nos dois lados, tamanho 6
+potential_line([-, A, A, A, A, - | Rest], 2) :-
+    %write('-> Detectado padrão -AAAA-\n'),
+    A \= '-', 
+    %!,
+    write('-> Contado padrão -AAAA-: +2 pontos\n'),
+    potential_line(Rest, 0). 
+
+% caso com points nos dois lados, tamanho 5
+potential_line([-, A, A, A, - | Rest], 2) :-
+    %write('-> Detectado padrão -AAA-\n'),
+    A \= '-', 
+    %!,
+    write('-> Contado padrão -AAA-: +2 pontos\n'),
+    potential_line(Rest, 0). 
+
+%agora os casos só com apenas de um lado
 % caso 1
 potential_line([A, A, A, '-' | Rest], 1) :- 
-    A \= '-',                                
+    %write('-> Detectado padrão AAA-\n'),
+    A \= '-', 
+    write('-> Contado padrão AAA-: +1 ponto\n'),                               
     potential_line(Rest, 0).
 
 % caso 2
 potential_line(['-', A, A, A | Rest], 1) :-
-    A \= '-',                               
+    %write('-> Detectado padrão -AAA\n'),
+    A \= '-', 
+    write('-> Contado padrão -AAA: +1 ponto\n'),                              
     potential_line(Rest, 0).
 
 % caso 3
 potential_line([A, A, '-', A | Rest], 1) :-
+    %write('-> Detectado padrão AA-A\n'),
     A \= '-',
+    write('-> Contado padrão AA-A: +1 ponto\n'),
     potential_line(Rest, 0).
 
 % caso 4
 potential_line([A,'-', A, A | Rest], 1) :-
+    %write('-> Detectado padrão A-AA\n'),
     A \= '-',
+    write('-> Contado padrão A-AA: +1 ponto\n'),
     potential_line(Rest, 0).
 
 potential_line([_ | Rest], Count) :-
+    %write('-> Nenhum padrão encontrado, passando para o próximo elemento.\n'),
     potential_line(Rest, Count).
 %tava a pensar se faria sentido no caso: -xxx nao passar xxx todo
 %mas por agora vou deixar passar
