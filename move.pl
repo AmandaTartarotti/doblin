@@ -305,8 +305,9 @@ remove_jokers([H|T], [H|Rest]):-
     remove_jokers(T, Rest).
 
 equal_sequence([]).
-equal_sequence(Cleaned):-
-    sort(Cleaned, [_]).
+equal_sequence([H|T]):-
+    H \= '-',
+    sort([H|T], [_]).
 
 %--------------------------------------------------- 
 
