@@ -14,7 +14,8 @@ display_game(game_state(_, board_size(Width, _), PlayerInfo1, PlayerInfo2, Curre
 
     %evaluate_game_state(game_state(_, _, PlayerInfo1, PlayerInfo2, CurrentPlayer), Value1, Value2),
     %format('Player 1 Value: ~w\nPlayer 2 Value: ~w\n', [Value1, Value2]),
-    evaluate_game_state(game_state(_, _, PlayerInfo1, PlayerInfo2, CurrentPlayer), _Perc1, _Perc2),
+    evaluate_game_state(game_state(_, _, PlayerInfo1, PlayerInfo2, CurrentPlayer), Perc1, Perc2),
+    print_percentages(Perc1,Perc2),
     %format('Player 1 Perc1: ~w\nPlayer 2 Perc2: ~w\n', [Perc1, Perc2]),
 
     nl, write('Game Boards:\n'), nl,
@@ -124,21 +125,24 @@ evaluate_game_state(game_state(_, _, PlayerInfo1, PlayerInfo2, CurrentPlayer), P
     TotalValue is Value1 + Value2,
     handle_percentages(Value1, Value2, TotalValue, Perc1, Perc2).
 
-handle_percentages(_, _, 0, 0, 0) :- % se TotalValue é zero, a percentagem fica a 0
+handle_percentages(_, _, 0, 0, 0) :- !.% se TotalValue é zero, a percentagem fica a 0
+    
+handle_percentages(Value1, Value2, TotalValue, Perc1, Perc2) :-
+    TotalValue \= 0,
+    Perc1 is round((Value1 / TotalValue) * 100),
+    Perc2 is round((Value2 / TotalValue) * 100).
+
+print_percentages(0,0):-
     write('---------------------------------------'),nl,
     write('Player 1 advantage percentage: 0%\n'),
     write('Player 2 advantage percentage: 0%\n'), 
     write('---------------------------------------'),nl,nl.
 
-handle_percentages(Value1, Value2, TotalValue, Perc1, Perc2) :-
-    TotalValue \= 0,
-    Perc1 is round((Value1 / TotalValue) * 100),
-    Perc2 is round((Value2 / TotalValue) * 100),
+print_percentages(Perc1,Perc2):-
     write('---------------------------------------'),nl,
     format('Player 1 advantage percentage: ~w%\n', [Perc1]),
     format('Player 2 advantage percentage: ~w%\n', [Perc2]) ,
     write('---------------------------------------'),nl,nl.
-
 
 %value(+GameState, +Player, -Value).
 %value do Player1, vê os pontos do jog2
