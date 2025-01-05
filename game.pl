@@ -3,7 +3,7 @@
 :- consult(configuration).
 :- consult(game_aux).
 
-play_game:-
+play:-
     game_menu(GameConfig),
     initial_state(GameConfig, GameState),
     display_game(GameState),
@@ -53,11 +53,12 @@ choose_machine_move(2, GameState, ValidMoves, moviment(BestMove, Symbol)):-
         member(Mv, ValidMoves), %aqui fui ver os moves que eram validMoves
         move(GameState, moviment(Mv, Symbol), NewState), %para cada move foi criado um NewState
         evaluate_game_state(NewState, Perc1, Perc2), %para ter acesso às Perc1 e Perc2
-        current_player_value(Perc1, Perc2, NewState, Value) , %para dar o value do jogador especifico
-        format('MV ~w Value desta jogada: ~w\n', [Value, Mv])
+        print_percentages(Perc1,Perc2),
+        current_player_value(Perc1, Perc2, NewState, Value)  %para dar o value do jogador especifico
+        %format('MV ~w Value desta jogada: ~w\n', [Value, Mv])
     ),SortedMoves),
     
-    format('Sorted moves: ~w', [SortedMoves]),
+    format('Sorted moves: ~w', [SortedMoves]),nl,
     last(SortedMoves, _-BestMove),
     format('Best move chosen: ~w', [BestMove]).
 
