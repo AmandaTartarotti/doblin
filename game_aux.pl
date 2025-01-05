@@ -161,11 +161,6 @@ handle_percentages(Value1, Value2, TotalValue, Perc1, Perc2) :-
 
 %value(+GameState, +Player, -Value).
 %value do Player1
-
-%FALTA 
-%2- Diagonais, verticais, quadrados
-
-
 %value(game_state(_, _, _, player_info(_, _, OpponentScore2, OpponentBoard2,_), _), 1, Value1) :-
 value(game_state(_, _, _, player_info(_Player2, _, OpponentScore2, _OpponentBoard2,_), _), 1, Value1) :-
     %format('OpponentScore2: ~w\n', [OpponentScore2]),
@@ -176,6 +171,7 @@ value(game_state(_, _, _, player_info(_Player2, _, OpponentScore2, _OpponentBoar
     %write('SAI DO count_possible_combinations '),nl,
     %format('OpponentScore2: ~w, PotentialCombinations: ~w\n', [OpponentScore2, PotentialCombinations]),
     % calculo do value
+    
     Value1 is OpponentScore2. %+ 0.5 * PotentialCombinations.
 
 %value do Player2
