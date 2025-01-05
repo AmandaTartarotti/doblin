@@ -44,7 +44,7 @@ choose_move(GameState, Computer_Level, moviment(Move, Symbol)):-
 %choose_move_machine Computer Level 1
 choose_machine_move(1, _GameState, ValidMoves, moviment(Move, _Symbol)):-
     random_select(Move, ValidMoves, _Rest),
-    format('\nSelected Move ~w\n', [Move]).
+    format('\nRandom move chosen: ~w\n', [Move]).
 
 choose_machine_move(2, GameState, ValidMoves, moviment(BestMove, Symbol)):-
     %com cada valid moves, ver os boards possiveis e guardar o points, daí escolher o move que gerou o board com mais value
@@ -58,7 +58,7 @@ choose_machine_move(2, GameState, ValidMoves, moviment(BestMove, Symbol)):-
     
     keysort(AllMoves, SortedMoves),
     last(SortedMoves, _-BestMove),
-    format('Best move chosen: ~w', [BestMove]).
+    format('\nBest move chosen: ~w', [BestMove]).
 
 
 current_player_value(Perc1, _Perc2, game_state(_, _, _, _, 1), Perc1).
