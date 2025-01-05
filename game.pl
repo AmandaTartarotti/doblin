@@ -57,16 +57,12 @@ choose_machine_move(2, GameState, ValidMoves, moviment(BestMove, Symbol)):-
         current_player_value(Perc1, Perc2, NewState, Value) %para dar o value do jogador especifico
     ),AllMoves),
     
-    keysort(AllMoves, SortedMoves),
+    keysort(AllMoves, SortedMoves), 
     last(SortedMoves, _-BestMove),
-    format('\nBest move chosen: ~w', [BestMove]).
+    format('<  Best move chosen: ~w  >', [BestMove]).
 
 
 current_player_value(Perc1, _Perc2, game_state(_, _, _, _, 1), Perc1).
 current_player_value(_Perc1, Perc2, game_state(_, _, _, _, 2), Perc2).
 
 
-        
-
-%valid_moves(GameState, Moves):-
-    %findall(Move, move(GameState, Move, NewState), Moves).

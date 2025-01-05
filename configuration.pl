@@ -93,9 +93,6 @@ info_about_project:-
 %--------------------------------------------------
 %--------------------------------------------------
 
-
-%old game start, só mudei para seguir a nomenclatura que esta na descricao do projeto
-
 %GAME MENU
 
 %Allows configuring the game type (H/H, H/PC, PC/H, or PC/PC), difficulty level(s) to be used and define each user last moves 

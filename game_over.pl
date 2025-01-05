@@ -1,8 +1,6 @@
 %---------------------------------------------------
 %---------------------------------------------------
-
 %HANDLE GAME OVER
-
 % Addendum: although the project description says that game_over should not print anything to the terminal,
 % in our game, we need to make the last 8 moves to determine the winner.
 
@@ -14,9 +12,8 @@
 %game_state -- recives a current game state
 %Winner -- returns the PlayerID with the biggest score
 
-%Strategy: receives a GameState where the CurrentPlayer is 1, checks if there are 8 remaining moves to be played,
+%Strategy: receives a GameState where the CurrentPlayer is 1, checks if there are 8 remaining moves to be played, 
 %and if so, it executes the last moves and returns the winner.
-
 game_over(game_state(Mode, BoardSize, PlayerInfo1, PlayerInfo2, 1), Winner):-
     valid_moves(game_state(Mode, BoardSize, PlayerInfo1, PlayerInfo2, 1), ValidMoves),
     length(ValidMoves, 8), %Confirma que restam exatamente 8 jogadas
@@ -31,7 +28,6 @@ game_over(_,_):-
 
 
 %---------------------------------------------------
-
 
 congratulate(0):-
     write('#############################################################\n'),

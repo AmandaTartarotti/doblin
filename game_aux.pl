@@ -1,25 +1,27 @@
-%-----------------------------------------------
+% initial_state(+GameConfig, -GameState)
+% Initializes the game state based on the provided game configuration
+% GameConfig -- includes the mode, board size, and players information
+% GameState -- set with current player as Player 1
 initial_state(
     game_configuration(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2), 
     game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, 1)
 ).
 
 %-----------------------------------------------
-%Display game and aux predicates
-
+% display_game(+GameState)
+% Displays the current game state, including the boards, scores, and advantage percentages
 display_game(game_state(_, board_size(Width, _), PlayerInfo1, PlayerInfo2, CurrentPlayer)) :-
     write('\n ***************************\n'),
     format('      Current Player: ~w\n', [CurrentPlayer]),
     write(' ***************************\n'),
 
-    %evaluate_game_state(game_state(_, _, PlayerInfo1, PlayerInfo2, CurrentPlayer), Value1, Value2),
-    %format('Player 1 Value: ~w\nPlayer 2 Value: ~w\n', [Value1, Value2]),
+    % Calculate advantage percentages to evaluate the current game state
     evaluate_game_state(game_state(_, _, PlayerInfo1, PlayerInfo2, CurrentPlayer), Perc1, Perc2),
     print_percentages(Perc1,Perc2),
-    %format('Player 1 Perc1: ~w\nPlayer 2 Perc2: ~w\n', [Perc1, Perc2]),
 
     nl, write('Game Boards:\n'), nl,
-    %Imprimir informações dos jogadores
+
+    % Display each player's score and board
     print_player_info(PlayerInfo1, Width), nl,
     print_player_info(PlayerInfo2, Width), nl.
    
@@ -29,7 +31,6 @@ print_player_info(player_info(Player, _, Score, Board,_), Width) :-
 
 print_player_board(board(Numbers, Letters, Cells), _) :-
     write('   '), % um espaço adicional so para formatar bonitin c:
-    %format('~w', [Numbers]), nl,  % Print each row
     print_numbers(Numbers),
     nl,
     write('  +'),
