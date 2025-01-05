@@ -88,8 +88,8 @@ info_about_project:-
     write('#    during the academic year 24/25 as part of the Bachelor  #\n'),
     write('#    in Computer and Informatics Engenieering at FEUP.       #\n'),
     write('#                                                            #\n'),
-    write('#    It was created for the subject "Functional and Logic     #\n'), 
-    write('#    Programming," guided by Professor Gonçalo Leão.         #\n'),
+    write('#    It was created for the subject "Functional and Logic    #\n'), 
+    write('#    Programming," guided by Professor Goncalo Leao          #\n'),
     write('#    [E]EXIT                                                 #\n'),
     write('##############################################################\n'),
     nl. 
@@ -155,7 +155,7 @@ handle_mode(5, _Last_move1, _Last_move2, _Level1, _Level2):-
     member(Char,['E','e']),
     !, 
     clear_buffer,
-    play_game.
+    play.
 
 %Handle Mode View info About Project
 handle_mode(6, _Last_move1, _Last_move2, _Level1, _Level2):- 
@@ -165,7 +165,7 @@ handle_mode(6, _Last_move1, _Last_move2, _Level1, _Level2):-
     member(Char,['E','e']),
     !, 
     clear_buffer,
-    play_game.
+    play.
 
 %Handle Exceptions
 handle_mode(_):- 
