@@ -64,14 +64,18 @@ game_rules :-
 
 info_about_project:-
     nl,
-    write('###############################################################\n'),
-    write('#                       INFO ABOUT PROJECT                    #\n'),
-    write('###############################################################\n'),
-    write('# 1. Project Name:                                            #\n'),
-    write('#    - ------------                                           #\n'),
-    write('#                                                             #\n'),
-    write('#    [E]EXIT                                                  #\n'),
-    write('###############################################################\n'),
+    write('##############################################################\n'),
+    write('#                      INFO ABOUT PROJECT                    #\n'),
+    write('##############################################################\n'),
+    write('# 1. Project Name: Doblin Game                               #\n'),
+    write('#    The game was developed by Amanda Silva and Tatiana Lin  #\n'),
+    write('#    during the academic year 24/25 as part of the Bachelor  #\n'),
+    write('#    in Computer and Informatics Engenieering at FEUP.       #\n'),
+    write('#                                                            #\n'),
+    write('#    It was created for the subject "Functional and Logic     #\n'), 
+    write('#    Programming," guided by Professor Gonçalo Leão.         #\n'),
+    write('#    [E]EXIT                                                 #\n'),
+    write('##############################################################\n'),
     nl. 
 
 %--------------------------------------------------
