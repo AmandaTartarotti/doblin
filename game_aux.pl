@@ -71,7 +71,7 @@ print_row([Cell|Tail]) :-
 
 %return player level
 get_level(game_state(_, _, player_info( _, _, _, _, Level), _, 1), Level).
-get_level(game_state(_, _, player_info( _, _, _, _, Level), _, 2), Level).
+get_level(game_state(_, _, _, player_info( _, _, _, _, Level), 2), Level).
 
 
 %-----------------------------------------------
