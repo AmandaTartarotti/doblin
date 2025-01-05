@@ -24,11 +24,15 @@ display_game(game_state(_, board_size(Width, _), PlayerInfo1, PlayerInfo2, Curre
     % Display each player's score and board
     print_player_info(PlayerInfo1, Width), nl,
     print_player_info(PlayerInfo2, Width), nl.
-   
+
+% print_player_info(+PlayerInfo, +Width)
+% Prints the score and board for a given player
 print_player_info(player_info(Player, _, Score, Board,_), Width) :-
     format('Player ~w score: ~w\n\n', [Player, Score]),
     print_player_board(Board, Width).
 
+% print_player_board(+Board, +Width)
+% Prints the board along with column headers and dividers
 print_player_board(board(Numbers, Letters, Cells), _) :-
     write('   '), % um espaço adicional so para formatar bonitin c:
     print_numbers(Numbers),
@@ -36,24 +40,26 @@ print_player_board(board(Numbers, Letters, Cells), _) :-
     write('  +'),
     print_divider(Numbers),
     nl,
-    % cada linha com a sua letra
+    % each row with a letter
     print_board_rows(Letters, Cells).
 
-% 1º linha com os numeros
+% print_numbers(+List)
+% Prints the column numbers on the board
 print_numbers([]).
 print_numbers([Num|Tail]) :-
     format(' ~w  ', [Num]),
     print_numbers(Tail).
 
-% divisor horizontal das linhas
+% print_divider(+List)
+% Prints the horizontal divider line
 print_divider([]) :-
     write(' ').
-
 print_divider([_|Tail]) :-
     write('---+'),
     print_divider(Tail).
 
-% todas as linhas 
+% print_board_rows(+Letters, +Cells)
+% Prints all rows with their corresponding letters and cell values
 print_board_rows([], []).
 print_board_rows([Letter|TailLetters], [Row|TailRows]) :-
     format('~w |', [Letter]),
@@ -64,7 +70,8 @@ print_board_rows([Letter|TailLetters], [Row|TailRows]) :-
     nl,
     print_board_rows(TailLetters, TailRows).
 
-% uma só linha
+% print_row(+Row)
+% Prints a single row of the board
 print_row([]).
 print_row([Cell|Tail]) :-
     format(' ~w |', [Cell]),
@@ -73,7 +80,8 @@ print_row([Cell|Tail]) :-
 %-----------------------------------------------
 %Define level
 
-%return player level
+% get_level(+GameState, -Level)
+% Retrieves the level of the current player
 get_level(game_state(_, _, player_info( _, _, _, _, Level), _, 1), Level).
 get_level(game_state(_, _, _, player_info( _, _, _, _, Level), 2), Level).
 
@@ -81,6 +89,8 @@ get_level(game_state(_, _, _, player_info( _, _, _, _, Level), 2), Level).
 %-----------------------------------------------
 %Next Player
 
+% next_player(+GameState, -NextGameState)
+% Switches the current player for the next turn
 next_player(
     game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer), 
     game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, NextPlayer)
@@ -90,28 +100,28 @@ next_player(
 
 %---------------------------------------------------
 %---------------------------------------------------
-% value for Player 1 and Player 2
-%evaluate_game_state(GameState, Value1, Value2) :-
-evaluate_game_state(game_state(_, _, PlayerInfo1, PlayerInfo2, CurrentPlayer), Perc1, Perc2):-
-    %write('----------- Calculating Value for Player 1 -----------'), nl,
-    value(game_state(_, _, PlayerInfo1, PlayerInfo2, CurrentPlayer), 1, Value1),  % calculate value for Player1
-    %format('Player 1 Value: ~w\n', [Value1]), nl,
+%Value for Player 1 and Player 2
 
-    %write('----------- Calculating Value for Player 2 -----------'), nl,
-    value(game_state(_, _, PlayerInfo1, PlayerInfo2, CurrentPlayer), 2, Value2), % calculate value for Player2
-    %format('Player 2 Value: ~w\n', [Value2]), nl,
-    %format('Value1: ~w Value2: ~w\n', [Value1, Value2]),nl,
+% evaluate_game_state(+GameState, -Perc1, -Perc2)
+% Calculates the advantage percentages for both players based on their scores
+evaluate_game_state(game_state(_, _, PlayerInfo1, PlayerInfo2, CurrentPlayer), Perc1, Perc2):-
+    value(game_state(_, _, PlayerInfo1, PlayerInfo2, CurrentPlayer), 1, Value1),  %  value Player1
+    value(game_state(_, _, PlayerInfo1, PlayerInfo2, CurrentPlayer), 2, Value2), %  value Player2
 
     TotalValue is Value1 + Value2,
     handle_percentages(Value1, Value2, TotalValue, Perc1, Perc2).
 
-handle_percentages(_, _, 0, 0, 0) :- !.% se TotalValue é zero, a percentagem fica a 0
+% handle_percentages(+Value1, +Value2, +TotalValue, -Perc1, -Perc2)
+% Calculates the percentage of advantage for both players.
+handle_percentages(_, _, 0, 0, 0) :- !.
     
 handle_percentages(Value1, Value2, TotalValue, Perc1, Perc2) :-
     TotalValue \= 0,
     Perc1 is round((Value1 / TotalValue) * 100),
     Perc2 is round((Value2 / TotalValue) * 100).
 
+% print_percentages(+Perc1, +Perc2)
+% Prints the advantage percentages for both players.
 print_percentages(0,0):-
     write('---------------------------------------'),nl,
     write('Player 1 advantage percentage: 0%\n'),
@@ -124,10 +134,10 @@ print_percentages(Perc1,Perc2):-
     format('Player 2 advantage percentage: ~w%\n', [Perc2]) ,
     write('---------------------------------------'),nl,nl.
 
-%value(+GameState, +Player, -Value).
-%value do Player1, vê os pontos do jog2
+%value(+GameState, +Player, -Value)
+%value Player 1, sees points of Player 2 
 value(game_state(_, _, _, player_info(_, _, OpponentScore2, _OpponentBoard2,_), _), 1, OpponentScore2).
-%value do Player1, vê os pontos do jog1
+%value Player 2, sees points of Player 1 
 value(game_state(_, _, player_info(_, _, OpponentScore1, _OpponentBoard1,_), _, _), 2, OpponentScore1).
 
 

@@ -150,7 +150,6 @@ handle_mode(5, _Last_move1, _Last_move2, _Level1, _Level2):-
     repeat,
     get_char(Char),
     member(Char,['E','e']),
-    %( Char = 'E' ; Char = 'e' ), 
     !, % Sai do repeat após uma entrada válida
     clear_buffer,
     play_game.
@@ -161,7 +160,6 @@ handle_mode(6, _Last_move1, _Last_move2, _Level1, _Level2):-
     repeat,
     get_char(Char),
     member(Char,['E','e']),
-    %( Char = 'E' ; Char = 'e' ), 
     !, % Sai do repeat após uma entrada válida
     clear_buffer,
     play_game.
