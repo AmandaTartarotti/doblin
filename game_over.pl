@@ -55,8 +55,8 @@ define_winner(game_state(_, _, player_info( _, _, Score1, _, _), player_info( _,
 
 
 compare_score(0,0).              %Tie
-compare_score(N, 1):-  N > 0.    %Winner is Player 1
-compare_score(_, 2).             %Winner is Player 2
+compare_score(N, 2):-  N > 0.    %Winner is Player 1
+compare_score(_, 1).             %Winner is Player 2
 
 %---------------------------------------------------
 
@@ -77,8 +77,7 @@ execute_last_moves(game_state(Mode, BoardSize, player_info(Id1, Last_move1, Scor
     display_game(IntermediateGameState),
     
     write('\nPlayer 2, your 4 final pieces are going to be placed in the remain spaces.\n'),
-    place_remain_final_pieces(4, IntermediateGameState, Last_move2, FinalGameState),
-    display_game(FinalGameState).
+    place_remain_final_pieces(4, IntermediateGameState, Last_move2, FinalGameState).
 
 %---------------------------------------------------
 
