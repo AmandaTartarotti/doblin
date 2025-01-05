@@ -49,16 +49,14 @@ choose_machine_move(1, _GameState, ValidMoves, moviment(Move, _Symbol)):-
 choose_machine_move(2, GameState, ValidMoves, moviment(BestMove, Symbol)):-
     %com cada valid moves, ver os boards possiveis e guardar o points, daí escolher o move que gerou o board com mais value
     %quero ter  uma lista de estrutura Value-move, onde testei cada move dentro dos ValidMoves, para cada move obtive um novo estado, o NewState e dps avaliei esse NewState, obtendo um Value em percentagem,o que tiver maior percentagem melhor jogo tem, colocamos isso dentro da lista chamada SortedMoves
-    setof(Value-Mv, NewState^(
+  findall(Value-Mv, NewState^(
         member(Mv, ValidMoves), %aqui fui ver os moves que eram validMoves
         move(GameState, moviment(Mv, Symbol), NewState), %para cada move foi criado um NewState
         evaluate_game_state(NewState, Perc1, Perc2), %para ter acesso às Perc1 e Perc2
-        print_percentages(Perc1,Perc2),
-        current_player_value(Perc1, Perc2, NewState, Value)  %para dar o value do jogador especifico
-        %format('MV ~w Value desta jogada: ~w\n', [Value, Mv])
-    ),SortedMoves),
+        current_player_value(Perc1, Perc2, NewState, Value), %para dar o value do jogador especifico
+    ),AllMoves),
     
-    format('Sorted moves: ~w', [SortedMoves]),nl,
+    keysort(AllMoves, SortedMoves),
     last(SortedMoves, _-BestMove),
     format('Best move chosen: ~w', [BestMove]).
 
