@@ -118,7 +118,7 @@ process('\n', []). % código ASCII para newline (10)
 process(Char, [Char | Tail]) :-
     read_line_to_string(Tail).
 
-%---------------------------------------------------   
+%---------------------------------------------------  
 
 move(
     game_state(Mode, board_size(Width, Height), PlayerInfo1, PlayerInfo2, CurrentPlayer), 
@@ -127,7 +127,7 @@ move(
 ):-
     validate_move(moviment(Move,_), board_size(Width, Height), PlayerInfo1), %passa um PlayerInfo qualquer para validar se é uma posição valida no board
     !, 
-    execute_move(Width, Height, moviment(Move,Symbol), PlayerInfo1, PlayerInfo2, UpdateInfo1, UpdateInfo2).
+    execute_move(Width, Height, moviment(Move,Symbol), PlayerInfo1, PlayerInfo2, UpdateInfo1, UpdateInfo2), !.
 
 move(GameState, moviment(_,Symbol), NewState):-
     write('\nInvalid move.\nEnter exactly two characters and make sure it is a free space on the board!\n'),

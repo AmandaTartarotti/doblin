@@ -129,6 +129,7 @@ handle_percentages(_, _, 0, 0, 0) :- % se TotalValue é zero, a percentagem fica
     write('---------------------------------------'),nl,nl.
 
 handle_percentages(Value1, Value2, TotalValue, Perc1, Perc2) :-
+    TotalValue \= 0,
     Perc1 is round((Value1 / TotalValue) * 100),
     Perc2 is round((Value2 / TotalValue) * 100),
     write('---------------------------------------'),nl,

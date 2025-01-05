@@ -37,29 +37,29 @@ choose_move(_GameState, 0, moviment(Move, Symbol)):-
     %format('You entered: ~w~n', [Move]).
 
 %choose_move Computer-Level
-choose_move(GameState, Computer_Level, moviment(Move, _Symbol)):-
+choose_move(GameState, Computer_Level, moviment(Move, Symbol)):-
     valid_moves(GameState, ValidMoves),
-    choose_machine_move(Computer_Level, GameState, ValidMoves, Move). 
+    choose_machine_move(Computer_Level, GameState, ValidMoves, moviment(Move, Symbol)). 
 
 %choose_move_machine Computer Level 1
-choose_machine_move(1, _GameState, ValidMoves, Move):-
+choose_machine_move(1, _GameState, ValidMoves, moviment(Move, _Symbol)):-
     random_select(Move, ValidMoves, _Rest),
     format('\nSelected Move ~w\n', [Move]).
 
-choose_machine_move(2, GameState, ValidMoves, BestMove):-
+choose_machine_move(2, GameState, ValidMoves, moviment(BestMove, Symbol)):-
     %com cada valid moves, ver os boards possiveis e guardar o points, daí escolher o move que gerou o board com mais value
     %quero ter  uma lista de estrutura Value-move, onde testei cada move dentro dos ValidMoves, para cada move obtive um novo estado, o NewState e dps avaliei esse NewState, obtendo um Value em percentagem,o que tiver maior percentagem melhor jogo tem, colocamos isso dentro da lista chamada SortedMoves
     setof(Value-Mv, NewState^(
         member(Mv, ValidMoves), %aqui fui ver os moves que eram validMoves
-        move(GameState, Mv, NewState), %para cada move foi criado um NewState
+        move(GameState, moviment(Mv, Symbol), NewState), %para cada move foi criado um NewState
         evaluate_game_state(NewState, Perc1, Perc2), %para ter acesso às Perc1 e Perc2
         current_player_value(Perc1, Perc2, NewState, Value) , %para dar o value do jogador especifico
-        write('Value desta jogada: '), writeln(Value)
+        format('MV ~w Value desta jogada: ~w\n', [Value, Mv])
     ),SortedMoves),
     
-    write('Sorted moves: '), writeln(SortedMoves),
+    format('Sorted moves: ~w', [SortedMoves]),
     last(SortedMoves, _-BestMove),
-    write('Best move chosen: '), writeln(BestMove).
+    format('Best move chosen: ~w', [BestMove]).
 
 
 current_player_value(Perc1, _Perc2, game_state(_, _, _, _, 1), Perc1).
