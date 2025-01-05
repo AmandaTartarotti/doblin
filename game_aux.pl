@@ -88,27 +88,6 @@ next_player(
 
 
 %---------------------------------------------------
-%Game Over
-
-%Embora nas descricao do projeto diz para o game_over não imprimir nada no terminal, 
-%no caso do nosso jogo precisamos fazer as 8 jogadas finais para definir o winner.
-
-%Recives a GameState where the CurrentPlayer is 1, checks if there are 8 remain moves to be played, if so it execute the last moves and returns the winner.
-
-game_over(game_state(Mode, BoardSize, PlayerInfo1, PlayerInfo2, 1), Winner):-
-    valid_moves(game_state(Mode, BoardSize, PlayerInfo1, PlayerInfo2, 1), ValidMoves),
-    length(ValidMoves, 8), %Confirma que restam exatamente 8 jogadas
-    execute_last_moves(
-        game_state(Mode, BoardSize, PlayerInfo1, PlayerInfo2, 1), 
-        FinalGameState
-    ),
-    define_winner(FinalGameState, Winner).
-
-game_over(_,_):-
-    fail.
-
-
-%---------------------------------------------------
 %---------------------------------------------------
 % value for Player 1 and Player 2
 %evaluate_game_state(GameState, Value1, Value2) :-

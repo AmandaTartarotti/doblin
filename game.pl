@@ -2,6 +2,7 @@
 :- consult(move).
 :- consult(configuration).
 :- consult(game_aux).
+:- consult(game_over).
 
 play:-
     game_menu(GameConfig),
@@ -53,7 +54,7 @@ choose_machine_move(2, GameState, ValidMoves, moviment(BestMove, Symbol)):-
         member(Mv, ValidMoves), %aqui fui ver os moves que eram validMoves
         move(GameState, moviment(Mv, Symbol), NewState), %para cada move foi criado um NewState
         evaluate_game_state(NewState, Perc1, Perc2), %para ter acesso às Perc1 e Perc2
-        current_player_value(Perc1, Perc2, NewState, Value), %para dar o value do jogador especifico
+        current_player_value(Perc1, Perc2, NewState, Value) %para dar o value do jogador especifico
     ),AllMoves),
     
     keysort(AllMoves, SortedMoves),
