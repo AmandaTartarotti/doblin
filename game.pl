@@ -53,17 +53,17 @@ choose_machine_move(2, GameState, ValidMoves, BestMove):-
         member(Mv, ValidMoves), %aqui fui ver os moves que eram validMoves
         move(GameState, Mv, NewState), %para cada move foi criado um NewState
         evaluate_game_state(NewState, Perc1, Perc2), %para ter acesso às Perc1 e Perc2
-        current_player_value(Perc1, Perc2, NewState, Value) ), %para dar o value do jogador especifico
-    SortedMoves),
+        current_player_value(Perc1, Perc2, NewState, Value) , %para dar o value do jogador especifico
+        write('Value desta jogada: '), writeln(Value)
+    ),SortedMoves),
     
-    last(SortedMoves, _-BestMove).
+    write('Sorted moves: '), writeln(SortedMoves),
+    last(SortedMoves, _-BestMove),
+    write('Best move chosen: '), writeln(BestMove).
 
 
-current_player_value(Perc1, _Perc2, game_state(_, _, _, _, 1), Value) :-
-    Value is Perc1. 
-
-current_player_value(_Perc1, Perc2, game_state(_, _, _, _, 2), Value) :-
-    Value is Perc2.
+current_player_value(Perc1, _Perc2, game_state(_, _, _, _, 1), Perc1).
+current_player_value(_Perc1, Perc2, game_state(_, _, _, _, 2), Perc2).
 
 
         

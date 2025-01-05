@@ -162,7 +162,7 @@ handle_percentages(Value1, Value2, TotalValue, Perc1, Perc2) :-
 %value(+GameState, +Player, -Value).
 %value do Player1
 %value(game_state(_, _, _, player_info(_, _, OpponentScore2, OpponentBoard2,_), _), 1, Value1) :-
-value(game_state(_, _, _, player_info(_Player2, _, OpponentScore2, _OpponentBoard2,_), _), 1, Value1) :-
+%value(game_state(_, _, _, player_info(_Player2, _, OpponentScore2, _OpponentBoard2,_), _), 1, Value1) :-
     %format('OpponentScore2: ~w\n', [OpponentScore2]),
     %format('Player2 score: ~w\n', [OpponentScore2]),
     %write('ENTREI NO VALUE1 '), nl,
@@ -172,17 +172,22 @@ value(game_state(_, _, _, player_info(_Player2, _, OpponentScore2, _OpponentBoar
     %format('OpponentScore2: ~w, PotentialCombinations: ~w\n', [OpponentScore2, PotentialCombinations]),
     % calculo do value
     
-    Value1 is OpponentScore2. %+ 0.5 * PotentialCombinations.
+   % Value1 is OpponentScore2. %+ 0.5 * PotentialCombinations.
 
 %value do Player2
-value(game_state(_, _, player_info(_, _, OpponentScore1, _OpponentBoard1,_), _, _), 2, Value2) :-
+%value(game_state(_, _, player_info(_, _, OpponentScore1, _OpponentBoard1,_), _, _), 2, Value2) :-
     %format('Player1 score: ~w\n', [OpponentScore1]),
     %write('ENTREI NO VALUE2: '),nl,
     % combinações possíveis (linhas com 3 elementos consecutivos ou quadrado quase completo com uma elemento em falta)
     %count_possible_combinations(OpponentBoard1, PotentialCombinations),
     %format('OpponentScore1: ~w, PotentialCombinations: ~w\n', [OpponentScore1, PotentialCombinations]),
     % calculo do value
-    Value2 is OpponentScore1. %+ 0.5 * PotentialCombinations.
+    %Value2 is OpponentScore1. %+ 0.5 * PotentialCombinations.
+    
+%value do Player1, vê os pontos do jog2
+value(game_state(_, _, _, player_info(_, _, OpponentScore2, _OpponentBoard2,_), _), 1, OpponentScore2).
+%value do Player1, vê os pontos do jog1
+value(game_state(_, _, player_info(_, _, OpponentScore1, _OpponentBoard1,_), _, _), 2, OpponentScore1).
 
 
 %------------------------------
