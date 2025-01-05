@@ -55,8 +55,8 @@ define_winner(game_state(_, _, player_info( _, _, Score1, _, _), player_info( _,
 
 
 compare_score(0,0).              %Tie
-compare_score(N, 1):-  N > 0.    %Winner is Player 1
-compare_score(_, 2).             %Winner is Player 2
+compare_score(N, 2):-  N > 0.    %Winner is Player 1
+compare_score(_, 1).             %Winner is Player 2
 
 %---------------------------------------------------
 
