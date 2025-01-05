@@ -35,7 +35,8 @@ congratulate(0):-
     write('#############################################################\n').   
 
 congratulate(Winner):-
-    Winner \= 0,
+    Winner \= 0, 
+    nl,
     write('#############################################################\n'),
     format('        CONGRATULATIONS THE WINNER IS PLAYER ~w\n', [Winner]),
     write('#############################################################\n').

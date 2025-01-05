@@ -144,7 +144,7 @@ value(game_state(_, _, player_info(_, _, OpponentScore1, _OpponentBoard1,_), _, 
 %---------------------------------------------------
 %---------------------------------------------------
 % generate_cells(+Width, +Height, -ListOfCells)
-%todas as células do tabuleiro 
+% Generates a list of all possible cells on the board based on the provided dimensions
 generate_cells(Width, Height, ListOfCells) :-
     findall(
         [RowChar, ColChar],
@@ -163,31 +163,21 @@ generate_cells(Width, Height, ListOfCells) :-
 
 
 % valid_moves(+GameState, -ListOfMoves)
+% List of valid moves for the current game state
 valid_moves(game_state(_, board_size(Width, Height), PlayerInfo, _, _), ListOfMoves) :-
-    %write('Width: '), write(Width), 
-    %nl,
-    %write('Height: '), write(Height), 
-    %nl,
     integer(Width), integer(Height),
 
     generate_cells(Width, Height, AllCells),
-    %write('AllCells: '), write(AllCells), 
     nl,
 
-    % aqui que filtra os moves que sao válidos
+    % filters the valid moves
     findall(
         [RowChar, ColChar],
         (
-            member([RowChar, ColChar], AllCells), % itera pelas cells
-            %write('Checking cell: '), write([RowChar, ColChar]), nl,
+            member([RowChar, ColChar], AllCells), % iterate the cells
             validate_move(moviment([RowChar, ColChar], _), board_size(Width, Height), PlayerInfo)
-            %validate_move(moviment([RowChar, ColChar], _), board_size(Width, Height), PlayerInfo),
-            %write('Valid cell: '), write([RowChar, ColChar]), nl 
         ),
         ListOfMoves
     ),
-    %write('ListOfMoves: '), write(ListOfMoves), 
     nl. 
 
-%---------------------------------------------------
-%---------------------------------------------------

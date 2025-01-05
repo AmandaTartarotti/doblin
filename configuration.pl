@@ -1,5 +1,6 @@
 
-%--------------------------------------------------
+% welcome/0
+% Displays the welcome message for the Doblin game, including game modes and options
 welcome:-
     write('===================================================================\n'),
     write('=                                                                 =\n'),
@@ -28,7 +29,9 @@ welcome:-
     write('                     Ready to start? Let\'s go!                    \n'),
     nl.
 
-
+% game_rules/0
+% Prints the game rules and instructions for playing Doblin, including the objective,
+% turn requirements, scoring, and strategy tips
 game_rules :-
     nl,
     write('#############################################################\n'),
@@ -73,7 +76,8 @@ game_rules :-
     write('#############################################################\n'),
     nl.
 
-
+% info_about_project/0
+% Displays information about the project
 info_about_project:-
     nl,
     write('##############################################################\n'),
@@ -92,7 +96,6 @@ info_about_project:-
 
 %--------------------------------------------------
 %--------------------------------------------------
-
 %GAME MENU
 
 %Allows configuring the game type (H/H, H/PC, PC/H, or PC/PC), difficulty level(s) to be used and define each user last moves 
@@ -108,7 +111,7 @@ game_menu(game_configuration(Mode, board_size(Width, Height), player_info(1, Las
     write(' ============================\n'),
     nl,
 
-    % Geração dos tabuleiros
+    % generate boards
     generate_board(Width, Height, Board1), 
     generate_board(Width, Height, Board2). 
 
@@ -146,11 +149,11 @@ handle_mode(4, Last_move1, Last_move2, Level1, Level2):-
 
 %Handle Mode View Game Rules 
 handle_mode(5, _Last_move1, _Last_move2, _Level1, _Level2):- 
-    game_rules, %fazer que ao clicar em [E] voltar para o menu
+    game_rules, 
     repeat,
     get_char(Char),
     member(Char,['E','e']),
-    !, % Sai do repeat após uma entrada válida
+    !, 
     clear_buffer,
     play_game.
 
@@ -160,13 +163,13 @@ handle_mode(6, _Last_move1, _Last_move2, _Level1, _Level2):-
     repeat,
     get_char(Char),
     member(Char,['E','e']),
-    !, % Sai do repeat após uma entrada válida
+    !, 
     clear_buffer,
     play_game.
 
 %Handle Exceptions
 handle_mode(_):- 
-    write('Other game_modes to be defined'). %dizer e fazer para repetir ate meter numero entre 1-5
+    write('Other game_modes to be defined'). 
 
 %--------------------------------------------------
 
@@ -272,8 +275,6 @@ game_board(Width, Length) :-
 %--------------------------------------------------
 %--------------------------------------------------
 
-%APAGAR FUTURAMENTE
-
 %criar o board - antigo --> tive que mudar a implementação para add os indices
 
 default('-').
@@ -301,35 +302,3 @@ format_board([Row|Rest]) :-
 format_row(Row) :-
     format('~w', [Row]).  % Print each row
 
-%--------------------------------------------------
-
-%DICAS PARA PROJETO 16/12/2024
-%bot random
-%bot mais inteligente
-
-%O que é suposto fazer o bot inteligente? Ver o 'value'!!!!!
-%Considerar todas as jogadas possiveis, e ver qual é a melhor jogada possivel.
-
-%NO CASO DE CHESS
-%a medida do site chess.com é que no exemplo do stor, tem 6 pioes de desvantagem
-%fazer Nw-Nb, e fazer formula com o value das peças
-%value= 9*(Qw-Qb)+5*(Rw-Rb)+3*(Bw-Bb)+3*(Nw-Nb)+1*(Pw-Pb)
-
-%controlar o centro do tabuleiro
-%ou seja nao só ver o numero de peças, mas tmb ver a posição das peças
-
-%no das tartarugas, ver o numero de tartarugas que já passou para o lado do adversario
-%+
-%ver a distancia a que tao do outro lado do adversário
-
-%Como condensar as duas condições?
-%-Ter função que pesa as duas coisas
-%value(State,Value):-
-%    eval_n_pieces(State,V1),
-%    eval_n_moves(State,V2),
-%    Value is V1+V2. % ou até pode ser Value is V1*0.4+V2*0.6.
-
-%valid_moves
-%findall(move(X-Y), Xf-Yf), (between(1,8,X),..para o resto das variaveis), can_move(State,move(X-Y,Xf-Yf)),ListMoves).
-
-%o bot nao é determinisco, dentro dos valid moves, fazer random!!!!! 
