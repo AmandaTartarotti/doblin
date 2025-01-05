@@ -4,7 +4,6 @@
 :- use_module(library(clpfd)).
 
 %--------------------------------------------------
-
 %Defined Data Structures
 
 board_size( _Width, _Height).
@@ -26,10 +25,9 @@ moviment(_Move,_Symbol).
 %empyt Last_move = 1
 %joker Last_move = 2
 
+
 %--------------------------------------------------
-
 %utils functions
-
 clear_buffer:-
     repeat,
     get_char(C),
