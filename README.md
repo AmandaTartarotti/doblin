@@ -8,7 +8,35 @@
     - Amanda Tartarotti Cardozo da Silva up202211647 
     - Tatiana Wang Lin up202206371
 
- # Overview
+# Installation and Execution
+
+**1.1 Prerequisites**
+
+Before running the game, ensure the following software is installed on your system:
+* SICStus Prolog 4.9 (mandatory for executing the Prolog code).
+> If not already installed, follow the official installation guide: [SICStus Prolog Download]([url](https://sicstus.sics.se/download4.html))
+* Text Editor or IDE (e.g., Visual Studio Code with the Prolog extension).
+
+**1.2 Game Execution**
+
+Follow the steps below to execute the game correctly:
+
+* Open the SICStus application
+* Load the main game file (game.pl):
+* To start the game, run:
+    * ?- play.
+
+It is also possible to launch SICStus in your terminal, following the steps:
+
+* Open your terminal (or Command Prompt on Windows)
+* Launch SICStus Prolog by typing:
+     * /usr/local/sicstus4.9.0/bin/sicstus
+* Load the main game file (for example, game.pl):
+    * ?- consult('game.pl').
+* To start the game, run:
+    * ?- play.
+
+# Overview
 
 Doblin is a strategic game played on two interconnected grids. The objective is to carefully fill each grid with symbols (O's and X's) while avoiding specific patterns that result in penalties. The objective is to fill each grid with O's and X's such that neither grid contains:
 * A line (horizontal, vertical, or diagonal) of four consecutive identical symbols (O or X).
